@@ -7,78 +7,26 @@ import java.security.KeyStoreException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public class JarVerify {
+public class JarSignatureValidator {
 
 	public static enum Result {
+		hasUnsignedEntries,
 		invalidSignature,
 		notSigned,
-		hasUnsignedEntries,
 		verified
 
 	}
 
-	private static class MyFormatter extends Formatter {
-
-		private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
-
-		public String format(LogRecord record) {
-			StringBuilder builder = new StringBuilder(1000);
-			builder.append(df.format(new Date(record.getMillis()))).append(" - ");
-			builder.append("[").append(record.getSourceClassName()).append(".");
-			builder.append(record.getSourceMethodName()).append("] - ");
-			builder.append("[").append(record.getLevel()).append("] - ");
-			builder.append(formatMessage(record));
-			builder.append("\n");
-			if (record.getThrown() != null) {
-				builder.append(" Exception! " + record.getThrown().getMessage());
-			}
-			return builder.toString();
-		}
-
-		public String getHead(Handler h) {
-			return super.getHead(h);
-		}
-
-		public String getTail(Handler h) {
-			return super.getTail(h);
-		}
-	}
-
-	public static void main(String[] args) throws Exception {
-		Logger logger = Logger.getLogger("");
-		Handler handler = new ConsoleHandler();
-		// handler.setFormatter(new MyFormatter());
-		handler.setLevel(Level.ALL);
-		logger.addHandler(handler);
-		logger.setLevel(Level.ALL);
-
-		JarVerify jv = new JarVerify();
-
-		// jv.verifyJar(new JarFile("./test/sample_signed_self_invalid_1.jar"));
-		// jv.verifyJar(new
-		// JarFile("./test/sample_signed_self_invalid_sfmod_2.jar"));
-		System.out.println(jv.verifyJar(new JarFile("./test/sample_signed_self.jar")));
-		System.out.println(jv.verifyJar(new JarFile("./test/sample_unsigned.jar")));
-	}
-
-	private final Logger log = Logger.getLogger(JarVerify.class.getName());
+	private final Logger log = Logger.getLogger(JarSignatureValidator.class.getName());
 
 	private boolean isCertForCodeSigning(final X509Certificate cert) throws CertificateParsingException {
 		List<String> extUsage = cert.getExtendedKeyUsage();
