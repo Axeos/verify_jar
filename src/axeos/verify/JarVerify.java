@@ -2,6 +2,7 @@ package axeos.verify;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.security.CodeSigner;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
@@ -26,6 +27,14 @@ import java.util.logging.Logger;
 
 public class JarVerify {
 
+	public static enum Result {
+		invalidSignature,
+		notSigned,
+		hasUnsignedEntries,
+		verified
+
+	}
+
 	static class MyFormatter extends Formatter {
 
 		private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
@@ -38,6 +47,9 @@ public class JarVerify {
 			builder.append("[").append(record.getLevel()).append("] - ");
 			builder.append(formatMessage(record));
 			builder.append("\n");
+			if (record.getThrown() != null) {
+				builder.append(" Exception! " + record.getThrown().getMessage());
+			}
 			return builder.toString();
 		}
 
@@ -63,8 +75,8 @@ public class JarVerify {
 		// jv.verifyJar(new JarFile("./test/sample_signed_self_invalid_1.jar"));
 		// jv.verifyJar(new
 		// JarFile("./test/sample_signed_self_invalid_sfmod_2.jar"));
-		jv.verifyJar(new JarFile("./test/sample_signed_self.jar"));
-		// jv.verifyJar(new JarFile("./test/sample_unsigned.jar"));
+		System.out.println(jv.verifyJar(new JarFile("./test/sample_signed_self.jar")));
+		System.out.println(jv.verifyJar(new JarFile("./test/sample_unsigned.jar")));
 	}
 
 	private final Logger log = Logger.getLogger(JarVerify.class.getName());
@@ -91,11 +103,13 @@ public class JarVerify {
 		return false;
 	}
 
-	public void verifyJar(final JarFile jarFile) throws IOException, KeyStoreException, CertificateParsingException {
+	
+	public Result verifyJar(final JarFile jarFile) throws IOException, KeyStoreException, CertificateParsingException {
 		byte[] buffer = new byte[8192];
 
 		boolean anySigned = false;
 		boolean hasUnsignedEntry = false;
+		boolean hasExpiredCert = false;
 
 		// -------
 
@@ -123,6 +137,10 @@ public class JarVerify {
 				while ((tmp = is.read(buffer, 0, buffer.length)) != -1)
 					;
 				isReadable = true;
+			} catch (java.lang.SecurityException e) {
+				if (log.isLoggable(Level.FINEST))
+					log.log(Level.FINEST, "  Invalid signature!!!", e);
+				return Result.invalidSignature;
 			} finally {
 				if (is != null) {
 					is.close();
@@ -142,7 +160,6 @@ public class JarVerify {
 				log.finest("  " + (isSigned ? "signed" : "      ") + "  " + (inManifest ? "manifest" : "        ") + "  ");
 			}
 
-			boolean hasExpiredCert = false;
 			if (isSigned) {
 				for (int i = 0; i < codeSigners.length; i++) {
 					Certificate cert = codeSigners[i].getSignerCertPath().getCertificates().get(0);
@@ -172,7 +189,14 @@ public class JarVerify {
 			log.fine("anySigned=" + anySigned);
 		}
 
-	}
+		if (!anySigned) {
+			return Result.notSigned;
+		} else if (hasUnsignedEntry) {
+			return Result.hasUnsignedEntries;
+		}
 
+		return Result.verified;
+
+	}
 
 }
