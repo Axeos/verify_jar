@@ -17,15 +17,13 @@ public class JarVerifyTest {
 	public void testVerifyJar() throws CertificateParsingException, KeyStoreException, IOException {
 		JarVerify jv = new JarVerify();
 
-		File f = new File("./");
-		System.out.println(f.getAbsolutePath());
-
 		Assert.assertEquals(Result.verified, jv.verifyJar(new JarFile("./test/sample_signed_self_tsa.jar")));
 		Assert.assertEquals(Result.verified, jv.verifyJar(new JarFile("./test/sample_signed_self.jar")));
 
 		Assert.assertEquals(Result.notSigned, jv.verifyJar(new JarFile("./test/sample_unsigned.jar")));
 
 		Assert.assertEquals(Result.hasUnsignedEntries, jv.verifyJar(new JarFile("./test/sample_signed_self_invalid_1.jar")));
+
 		Assert.assertEquals(Result.invalidSignature, jv.verifyJar(new JarFile("./test/sample_signed_self_invalid_error.jar")));
 		Assert.assertEquals(Result.invalidSignature, jv.verifyJar(new JarFile("./test/sample_signed_self_invalid_sfmod_1.jar")));
 		Assert.assertEquals(Result.invalidSignature, jv.verifyJar(new JarFile("./test/sample_signed_self_invalid_sfmod_2.jar")));

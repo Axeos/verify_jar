@@ -2,7 +2,6 @@ package axeos.verify;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.security.CodeSigner;
 import java.security.KeyStoreException;
 import java.security.cert.Certificate;
@@ -35,7 +34,7 @@ public class JarVerify {
 
 	}
 
-	static class MyFormatter extends Formatter {
+	private static class MyFormatter extends Formatter {
 
 		private final DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
 
@@ -65,7 +64,7 @@ public class JarVerify {
 	public static void main(String[] args) throws Exception {
 		Logger logger = Logger.getLogger("");
 		Handler handler = new ConsoleHandler();
-		handler.setFormatter(new MyFormatter());
+		// handler.setFormatter(new MyFormatter());
 		handler.setLevel(Level.ALL);
 		logger.addHandler(handler);
 		logger.setLevel(Level.ALL);
@@ -81,9 +80,7 @@ public class JarVerify {
 
 	private final Logger log = Logger.getLogger(JarVerify.class.getName());
 
-	Hashtable<Certificate, String> storeHash = new Hashtable<Certificate, String>();
-
-	boolean isCertForCodeSigning(final X509Certificate cert) throws CertificateParsingException {
+	private boolean isCertForCodeSigning(final X509Certificate cert) throws CertificateParsingException {
 		List<String> extUsage = cert.getExtendedKeyUsage();
 		// 2.5.29.37.0 - Any extended key usage
 		// 1.3.6.1.5.5.7.3.3 - Code Signing
@@ -103,7 +100,6 @@ public class JarVerify {
 		return false;
 	}
 
-	
 	public Result verifyJar(final JarFile jarFile) throws IOException, KeyStoreException, CertificateParsingException {
 		byte[] buffer = new byte[8192];
 
@@ -129,14 +125,11 @@ public class JarVerify {
 
 			if (log.isLoggable(Level.FINEST))
 				log.finest("Checking file " + entry);
-			boolean isReadable;
 			try {
 				is = jarFile.getInputStream(entry);
-				int tmp;
 				// Checking SHA-1
-				while ((tmp = is.read(buffer, 0, buffer.length)) != -1)
+				while ((is.read(buffer, 0, buffer.length)) != -1)
 					;
-				isReadable = true;
 			} catch (java.lang.SecurityException e) {
 				if (log.isLoggable(Level.FINEST))
 					log.log(Level.FINEST, "  Invalid signature!!!", e);
@@ -196,7 +189,6 @@ public class JarVerify {
 		}
 
 		return Result.verified;
-
 	}
 
 }
