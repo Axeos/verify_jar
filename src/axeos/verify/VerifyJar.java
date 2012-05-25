@@ -102,12 +102,27 @@ public class VerifyJar {
 
 			switch (res) {
 			case verified:
+				System.out.println("verified");
 				System.exit(0);
 				break;
 			case expiredCertificate:
+				System.out.println("not verified. expired certificate");
 				System.exit(1);
 				break;
+			case hasUnsignedEntries:
+				System.out.println("not verified. contains unsigned entries");
+				System.exit(2);
+				break;
+			case notSigned:
+				System.out.println("not verified. not signed");
+				System.exit(2);
+				break;
+			case invalidCertificate:
+				System.out.println("not verified. certificate not valid");
+				System.exit(2);
+				break;
 			default:
+				System.out.println("not verified.");
 				System.exit(2);
 				break;
 			}
