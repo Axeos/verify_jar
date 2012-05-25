@@ -1,6 +1,7 @@
 package axeos.verify;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.CodeSigner;
@@ -49,11 +50,15 @@ public class JarSignatureValidator {
 
 	private String ocspResponderURL;
 
+	private PKIXParameters params;
+
 	private boolean skipCertUsage = false;
 
 	private String trustedKeystore;
 
 	private boolean useOCSP;
+
+	private CertPathValidator validator;
 
 	public List<String> getCrlFileNames() {
 		return crlFileNames;
@@ -65,6 +70,45 @@ public class JarSignatureValidator {
 
 	public String getTrustedKeystore() {
 		return trustedKeystore;
+	}
+
+	private void initPathValdiator() throws NoSuchAlgorithmException, KeyStoreException, CertificateException,
+			FileNotFoundException, IOException, InvalidAlgorithmParameterException, CRLException {
+		if (trustedKeystore == null) {
+			log.info("  No trusted keystore. Certificate path validation skiped.");
+			this.validator = null;
+			return;
+		}
+
+		Security.setProperty("ocsp.enable", useOCSP ? "true" : "false");
+		if (ocspResponderURL != null)
+			Security.setProperty("ocsp.responderURL", ocspResponderURL);
+
+		CertPathValidator validator = CertPathValidator.getInstance("PKIX");
+
+		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+		keystore.load(new FileInputStream(trustedKeystore), null);
+
+		this.params = new PKIXParameters(keystore);
+
+		List l = new ArrayList();
+
+		params.setRevocationEnabled(useOCSP || crlFileNames != null && !crlFileNames.isEmpty());
+
+		if (crlFileNames != null) {
+			for (String crlFile : crlFileNames) {
+				l.addAll(CertificateFactory.getInstance("X.509").generateCRLs(new FileInputStream(crlFile)));
+			}
+		}
+
+		CollectionCertStoreParameters csParams = new CollectionCertStoreParameters(l);
+
+		CertStore certStore = CertStore.getInstance("Collection", csParams);
+
+		params.addCertStore(certStore);
+
+		this.validator = validator;
 	}
 
 	private boolean isCertForCodeSigning(final X509Certificate cert) throws CertificateParsingException {
@@ -114,38 +158,9 @@ public class JarSignatureValidator {
 	private void validatePath(CertPath path) throws NoSuchAlgorithmException, KeyStoreException,
 			InvalidAlgorithmParameterException, CertPathValidatorException, CRLException, CertificateException, IOException {
 
-		if (trustedKeystore == null) {
-			log.info("  No trusted keystore. Certificate path validation skiped.");
+		if (validator == null) {
 			return;
 		}
-
-		Security.setProperty("ocsp.enable", useOCSP ? "true" : "false");
-		if (ocspResponderURL != null)
-			Security.setProperty("ocsp.responderURL", ocspResponderURL);
-
-		CertPathValidator validator = CertPathValidator.getInstance("PKIX");
-
-		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-
-		keystore.load(new FileInputStream(trustedKeystore), null);
-
-		PKIXParameters params = new PKIXParameters(keystore);
-
-		List l = new ArrayList();
-
-		params.setRevocationEnabled(useOCSP || crlFileNames != null && !crlFileNames.isEmpty());
-
-		if (crlFileNames != null) {
-			for (String crlFile : crlFileNames) {
-				l.addAll(CertificateFactory.getInstance("X.509").generateCRLs(new FileInputStream(crlFile)));
-			}
-		}
-
-		CollectionCertStoreParameters csParams = new CollectionCertStoreParameters(l);
-
-		CertStore certStore = CertStore.getInstance("Collection", csParams);
-
-		params.addCertStore(certStore);
 
 		PKIXCertPathValidatorResult result = (PKIXCertPathValidatorResult) validator.validate(path, params);
 
@@ -162,6 +177,7 @@ public class JarSignatureValidator {
 		boolean hasUnsignedEntry = false;
 		boolean hasExpiredCert = false;
 
+		initPathValdiator();
 		// -------
 
 		final long now = System.currentTimeMillis();
