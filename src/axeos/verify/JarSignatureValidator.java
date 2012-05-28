@@ -27,6 +27,7 @@ import java.security.cert.PKIXCertPathValidatorResult;
 import java.security.cert.PKIXParameters;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -63,6 +64,8 @@ public class JarSignatureValidator {
 
 	private CertPathValidator validator;
 
+	private Date verificationDate;
+
 	public List<String> getCrlFileNames() {
 		return crlFileNames;
 	}
@@ -73,6 +76,10 @@ public class JarSignatureValidator {
 
 	public String getTrustedKeystore() {
 		return trustedKeystore;
+	}
+
+	public Date getVerificationDate() {
+		return verificationDate;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -95,6 +102,10 @@ public class JarSignatureValidator {
 		keystore.load(new FileInputStream(trustedKeystore), null);
 
 		this.params = new PKIXParameters(keystore);
+		if (verificationDate != null) {
+			log.fine("Using verification date: " + verificationDate);
+			this.params.setDate(verificationDate);
+		}
 
 		List l = new ArrayList();
 
@@ -157,6 +168,10 @@ public class JarSignatureValidator {
 
 	public void setUseOCSP(boolean useOCSP) {
 		this.useOCSP = useOCSP;
+	}
+
+	public void setVerificationDate(Date verificationDate) {
+		this.verificationDate = verificationDate;
 	}
 
 	private void validatePath(CertPath path) throws NoSuchAlgorithmException, KeyStoreException,
@@ -271,10 +286,17 @@ public class JarSignatureValidator {
 						}
 
 						try {
-							if (timestamp != null)
+							if (timestamp != null) {
+								log.finest("  validating certificate validity (time from signature timestamp): "
+										+ timestamp.getTimestamp());
 								((X509Certificate) cert).checkValidity(timestamp.getTimestamp());
-							else
+							} else if (verificationDate != null) {
+								log.finest("  validating certificate validity (time from user): " + verificationDate);
+								((X509Certificate) cert).checkValidity(verificationDate);
+							} else {
+								log.finest("  validating certificate validity (current time)");
 								((X509Certificate) cert).checkValidity();
+							}
 						} catch (CertificateNotYetValidException e) {
 							hasExpiredCert = true;
 						} catch (CertificateExpiredException e) {

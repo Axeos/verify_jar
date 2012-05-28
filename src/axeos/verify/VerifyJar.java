@@ -97,10 +97,40 @@ public class VerifyJar {
 
 	private boolean quiet = false;
 
+	private Date parseDate(String d) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+		try {
+			return sdf.parse(d);
+		} catch (Exception e) {
+		}
+		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try {
+			return sdf.parse(d);
+		} catch (Exception e) {
+		}
+		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		try {
+			return sdf.parse(d);
+		} catch (Exception e) {
+		}
+		sdf = new SimpleDateFormat("yyyy-MM-dd");
+		try {
+			return sdf.parse(d);
+		} catch (Exception e) {
+		}
+		return null;
+	}
+
 	private void parseParameters(String[] args) {
 		for (int i = 0; i < args.length; i++) {
 			String par = args[i];
-			if ("-quiet".equalsIgnoreCase(par)) {
+			if ("-date".equalsIgnoreCase(par)) {
+				String d = args[++i];
+				if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
+					d += " " + args[++i];
+				}
+				jv.setVerificationDate(parseDate(d));
+			} else if ("-quiet".equalsIgnoreCase(par)) {
 				quiet = true;
 			} else if ("-debug".equalsIgnoreCase(par)) {
 				Logger logger = Logger.getLogger("");
