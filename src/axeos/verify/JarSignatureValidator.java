@@ -78,10 +78,6 @@ public class JarSignatureValidator {
 		return trustedKeystore;
 	}
 
-	public Date getVerificationDate() {
-		return verificationDate;
-	}
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initPathValdiator() throws NoSuchAlgorithmException, KeyStoreException, CertificateException,
 			FileNotFoundException, IOException, InvalidAlgorithmParameterException, CRLException {
@@ -170,14 +166,11 @@ public class JarSignatureValidator {
 		this.useOCSP = useOCSP;
 	}
 
-	public void setVerificationDate(Date verificationDate) {
-		this.verificationDate = verificationDate;
-	}
-
 	private void validatePath(CertPath path) throws NoSuchAlgorithmException, KeyStoreException,
 			InvalidAlgorithmParameterException, CertPathValidatorException, CRLException, CertificateException, IOException {
 
 		if (validator == null) {
+			log.finest("  path validation skiped (it needs trusted keystore)");
 			return;
 		}
 
@@ -331,6 +324,14 @@ public class JarSignatureValidator {
 		if (log.isLoggable(Level.FINE))
 			log.fine("File verified");
 		return Result.verified;
+	}
+
+	public void setVerificationDate(Date verificationDate) {
+		this.verificationDate = verificationDate;
+	}
+
+	public Date getVerificationDate() {
+		return verificationDate;
 	}
 
 }
