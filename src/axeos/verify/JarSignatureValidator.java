@@ -79,7 +79,7 @@ public class JarSignatureValidator {
 	private void initPathValdiator() throws NoSuchAlgorithmException, KeyStoreException, CertificateException,
 			FileNotFoundException, IOException, InvalidAlgorithmParameterException, CRLException {
 		if (trustedKeystore == null) {
-			log.info("  No trusted keystore. Certificate path validation skiped.");
+			log.fine("  No trusted keystore. Certificate path validation skiped.");
 			this.validator = null;
 			return;
 		}
@@ -237,7 +237,7 @@ public class JarSignatureValidator {
 						try {
 							validatePath(cp);
 						} catch (Exception e) {
-							log.info("Timestamp certificate is not valid");
+							log.fine("Timestamp certificate is not valid");
 							return Result.invalidSignature;
 						}
 					}
@@ -251,7 +251,7 @@ public class JarSignatureValidator {
 					try {
 						validatePath(path);
 					} catch (Exception e) {
-						log.info("Certificate path can't be verified!");
+						log.fine("Certificate path can't be verified!");
 						return Result.invalidCertificate;
 					}
 
@@ -264,7 +264,7 @@ public class JarSignatureValidator {
 						boolean correctUsage = isCertForCodeSigning((X509Certificate) cert);// TODO
 
 						if (!skipCertUsage && !correctUsage) {
-							log.info("Certificate can't be used to signing code");
+							log.fine("Certificate can't be used to signing code");
 							return Result.invalidCertificate;
 						}
 
@@ -280,7 +280,7 @@ public class JarSignatureValidator {
 						}
 
 						if (hasExpiredCert) {
-							log.info("Certificate is expired");
+							log.fine("Certificate is expired");
 							return Result.expiredCertificate;
 						}
 
@@ -295,17 +295,17 @@ public class JarSignatureValidator {
 		}
 
 		if (!anySigned) {
-			if (log.isLoggable(Level.INFO))
-				log.info("File is not signed");
+			if (log.isLoggable(Level.FINE))
+				log.fine("File is not signed");
 			return Result.notSigned;
 		} else if (hasUnsignedEntry) {
-			if (log.isLoggable(Level.INFO))
-				log.info("File contains unsigned entries!");
+			if (log.isLoggable(Level.FINE))
+				log.fine("File contains unsigned entries!");
 			return Result.hasUnsignedEntries;
 		}
 
-		if (log.isLoggable(Level.INFO))
-			log.info("File verified");
+		if (log.isLoggable(Level.FINE))
+			log.fine("File verified");
 		return Result.verified;
 	}
 
