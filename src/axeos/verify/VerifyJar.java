@@ -65,11 +65,13 @@ public class VerifyJar {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String dt = getBuildDate();
-		System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
 
 		VerifyJar v = new VerifyJar();
 		v.parseParameters(args);
+		if (!v.quiet) {
+			String dt = getBuildDate();
+			System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
+		}
 		if (v.file == null) {
 			showHelp();
 			System.exit(-1);
@@ -86,16 +88,21 @@ public class VerifyJar {
 		System.out.println("  -ocspResponder <url> :  ");
 		System.out.println("  -crl <file>  :  ");
 		System.out.println("  -skipUsage  :  ");
+		System.out.println("  -quiet  :  ");
 	}
 
 	private String file;
 
 	private final JarSignatureValidator jv = new JarSignatureValidator();
 
+	private boolean quiet = false;
+
 	private void parseParameters(String[] args) {
 		for (int i = 0; i < args.length; i++) {
 			String par = args[i];
-			if ("-debug".equalsIgnoreCase(par)) {
+			if ("-quiet".equalsIgnoreCase(par)) {
+				quiet = true;
+			} else if ("-debug".equalsIgnoreCase(par)) {
 				Logger logger = Logger.getLogger("");
 				Handler handler = new ConsoleHandler();
 				handler.setFormatter(new MyFormatter());
@@ -127,33 +134,40 @@ public class VerifyJar {
 
 			switch (res) {
 			case verified:
-				System.out.println("verified");
+				if (!quiet)
+					System.out.println("verified");
 				System.exit(0);
 				break;
 			case expiredCertificate:
-				System.out.println("not verified. expired certificate");
+				if (!quiet)
+					System.out.println("not verified. expired certificate");
 				System.exit(1);
 				break;
 			case hasUnsignedEntries:
-				System.out.println("not verified. contains unsigned entries");
+				if (!quiet)
+					System.out.println("not verified. contains unsigned entries");
 				System.exit(2);
 				break;
 			case notSigned:
-				System.out.println("not verified. not signed");
+				if (!quiet)
+					System.out.println("not verified. not signed");
 				System.exit(2);
 				break;
 			case invalidCertificate:
-				System.out.println("not verified. certificate not valid");
+				if (!quiet)
+					System.out.println("not verified. certificate not valid");
 				System.exit(2);
 				break;
 			default:
-				System.out.println("not verified.");
+				if (!quiet)
+					System.out.println("not verified.");
 				System.exit(2);
 				break;
 			}
 
 		} catch (Throwable e) {
-			e.printStackTrace();
+			if (!quiet)
+				e.printStackTrace();
 			System.exit(2);
 		}
 	}
