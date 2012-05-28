@@ -10,6 +10,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.Timestamp;
 import java.security.cert.CRLException;
 import java.security.cert.CertPath;
 import java.security.cert.CertPathValidator;
@@ -17,7 +18,9 @@ import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXCertPathValidatorResult;
@@ -72,6 +75,7 @@ public class JarSignatureValidator {
 		return trustedKeystore;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initPathValdiator() throws NoSuchAlgorithmException, KeyStoreException, CertificateException,
 			FileNotFoundException, IOException, InvalidAlgorithmParameterException, CRLException {
 		if (trustedKeystore == null) {
@@ -163,6 +167,8 @@ public class JarSignatureValidator {
 		}
 
 		PKIXCertPathValidatorResult result = (PKIXCertPathValidatorResult) validator.validate(path, params);
+		if (result == null)
+			throw new RuntimeException("No result???");
 
 		if (log.isLoggable(Level.FINEST)) {
 			log.finest("  path valid");
@@ -179,8 +185,6 @@ public class JarSignatureValidator {
 
 		initPathValdiator();
 		// -------
-
-		final long now = System.currentTimeMillis();
 
 		// -------
 
@@ -227,6 +231,16 @@ public class JarSignatureValidator {
 			if (isSigned) {
 				for (int i = 0; i < codeSigners.length; i++) {
 					Certificate cert = codeSigners[i].getSignerCertPath().getCertificates().get(0);
+					Timestamp timestamp = codeSigners[i].getTimestamp();
+					if (timestamp != null) {
+						CertPath cp = timestamp.getSignerCertPath();
+						try {
+							validatePath(cp);
+						} catch (Exception e) {
+							log.info("Timestamp certificate is not valid");
+							return Result.invalidSignature;
+						}
+					}
 
 					List<Certificate> x = new ArrayList<Certificate>();
 					for (Certificate c : codeSigners[i].getSignerCertPath().getCertificates()) {
@@ -254,10 +268,14 @@ public class JarSignatureValidator {
 							return Result.invalidCertificate;
 						}
 
-						long notAfter = ((X509Certificate) cert).getNotAfter().getTime();
-						long notBefore = ((X509Certificate) cert).getNotBefore().getTime();
-
-						if (notAfter < now || notBefore > now) {
+						try {
+							if (timestamp != null)
+								((X509Certificate) cert).checkValidity(timestamp.getTimestamp());
+							else
+								((X509Certificate) cert).checkValidity();
+						} catch (CertificateNotYetValidException e) {
+							hasExpiredCert = true;
+						} catch (CertificateExpiredException e) {
 							hasExpiredCert = true;
 						}
 
