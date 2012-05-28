@@ -1,0 +1,18 @@
+HOME			= .
+RANDFILE		= ./.rnd
+
+[ req ]
+default_bits		= 2048
+distinguished_name	= ca_distinguished_name
+attributes		= ca_attributes
+x509_extensions		= ca_req
+prompt			= no
+
+[ ca_distinguished_name ]
+commonName		= Test CA 1
+
+[ ca_attributes ]
+
+[ ca_req ]
+basicConstraints	= CA:true
+keyUsage		= cRLSign, keyCertSign
