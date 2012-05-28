@@ -233,8 +233,10 @@ public class JarSignatureValidator {
 					Certificate cert = codeSigners[i].getSignerCertPath().getCertificates().get(0);
 					Timestamp timestamp = codeSigners[i].getTimestamp();
 					if (timestamp != null) {
+						log.finer("  Found timestamp.");
 						CertPath cp = timestamp.getSignerCertPath();
 						try {
+							log.finer("  Validating timestamp certificate path");
 							validatePath(cp);
 						} catch (Exception e) {
 							log.fine("Timestamp certificate is not valid");
