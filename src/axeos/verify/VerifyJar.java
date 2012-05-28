@@ -66,12 +66,8 @@ public class VerifyJar {
 	}
 
 	public static void main(String[] args) throws Exception {
-		Logger logger = Logger.getLogger("");
-		Handler handler = new ConsoleHandler();
-		handler.setFormatter(new MyFormatter());
-		handler.setLevel(Level.ALL);
-		logger.addHandler(handler);
-		logger.setLevel(Level.ALL);
+		String dt = getBuildDate();
+		System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
 
 		VerifyJar v = new VerifyJar();
 		v.parseParameters(args);
@@ -80,21 +76,9 @@ public class VerifyJar {
 			System.exit(-1);
 		}
 		v.run();
-
-		// JarSignatureValidator jv = new JarSignatureValidator();
-
-		// jv.verifyJar(new JarFile("./test/sample_signed_self_invalid_1.jar"));
-		// jv.verifyJar(new
-		// JarFile("./test/sample_signed_self_invalid_sfmod_2.jar"));
-		// System.out.println(jv.verifyJar(new
-		// JarFile("./test/sample_signed_self.jar")));
-		// System.out.println(jv.verifyJar(new
-		// JarFile("./test/sample_unsigned.jar")));
 	}
 
 	private static void showHelp() {
-		String dt = getBuildDate();
-		System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
 		System.out.println("Usage:");
 		System.out.println("   verify_jar <parameters> <jar_file>");
 		System.out.println("Parameters:");
@@ -114,7 +98,14 @@ public class VerifyJar {
 	private void parseParameters(String[] args) {
 		for (int i = 0; i < args.length; i++) {
 			String par = args[i];
-			if ("-trustedKeystore".equalsIgnoreCase(par)) {
+			if ("-debug".equalsIgnoreCase(par)) {
+				Logger logger = Logger.getLogger("");
+				Handler handler = new ConsoleHandler();
+				handler.setFormatter(new MyFormatter());
+				handler.setLevel(Level.ALL);
+				logger.addHandler(handler);
+				logger.setLevel(Level.ALL);
+			} else if ("-trustedKeystore".equalsIgnoreCase(par)) {
 				jv.setTrustedKeystore(args[++i]);
 			} else if ("-ocsp".equalsIgnoreCase(par)) {
 				jv.setUseOCSP(true);
