@@ -89,6 +89,7 @@ public class VerifyJar {
 		System.out.println("  -crl <file>  :  ");
 		System.out.println("  -skipUsage  :  ");
 		System.out.println("  -quiet  :  ");
+		System.out.println("  -time <time>  :  format: yyyy-MM-dd[ HH:mm[:ss[.S]]]");
 	}
 
 	private String file;
