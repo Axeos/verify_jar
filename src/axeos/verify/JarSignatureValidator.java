@@ -259,6 +259,7 @@ public class JarSignatureValidator {
 					CertPath path = CertificateFactory.getInstance("X.509").generateCertPath(x);
 
 					try {
+						log.finest("Validating signer certificate path");
 						validatePath(path);
 					} catch (Exception e) {
 						log.fine("Certificate path can't be verified!");
