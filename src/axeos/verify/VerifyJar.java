@@ -1,9 +1,12 @@
 package axeos.verify;
 
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -45,6 +48,23 @@ public class VerifyJar {
 		}
 	}
 
+	private static String getBuildDate() {
+		String buildTime = null;
+		try {
+			URLClassLoader cl = (URLClassLoader) VerifyJar.class.getClassLoader();
+			URL url = cl.findResource("META-INF/MANIFEST.MF");
+			Manifest manifest = new Manifest(url.openStream());
+			return manifest.getMainAttributes().getValue("Built-Date");
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private static String getVersion() {
+		String version = VerifyJar.class.getPackage().getImplementationVersion();
+		return version == null ? "0.0.0" : version;
+	}
+
 	public static void main(String[] args) throws Exception {
 		Logger logger = Logger.getLogger("");
 		Handler handler = new ConsoleHandler();
@@ -55,6 +75,10 @@ public class VerifyJar {
 
 		VerifyJar v = new VerifyJar();
 		v.parseParameters(args);
+		if (v.file == null) {
+			showHelp();
+			System.exit(-1);
+		}
 		v.run();
 
 		// JarSignatureValidator jv = new JarSignatureValidator();
@@ -66,6 +90,19 @@ public class VerifyJar {
 		// JarFile("./test/sample_signed_self.jar")));
 		// System.out.println(jv.verifyJar(new
 		// JarFile("./test/sample_unsigned.jar")));
+	}
+
+	private static void showHelp() {
+		String dt = getBuildDate();
+		System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
+		System.out.println("Usage:");
+		System.out.println("   verify_jar <parameters> <jar_file>");
+		System.out.println("Parameters:");
+		System.out.println("  -trustedKeystore <file>  :  ");
+		System.out.println("  -ocsp  :  ");
+		System.out.println("  -ocspResponder <url> :  ");
+		System.out.println("  -crl <file>  :  ");
+		System.out.println("  -skipUsage  :  ");
 	}
 
 	private String file;
