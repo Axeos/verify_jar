@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="verify_jar" default="build">
+
+	<property file="build.properties" />
+
+	<!-- ================================= 
+          target: build              
+         ================================= -->
+	<target name="build" depends="clean,compile" description="Builds jar">
+		<tstamp>
+			<format property="build.time" pattern="dd-MM-yyyy hh:mm:ss.S" locale="en" />
+		</tstamp>
+		<jar destfile="${target.dir}/verify_jar.jar">
+			<fileset dir="${bin.dir}">
+			</fileset>
+			<include name="**/*" />
+			<manifest>
+				<attribute name="Main-Class" value="axeos.verify.VerifyJar" />
+				<attribute name="Built-Date" value="${build.time}" />
+				<attribute name="Package" value="axeos.verify" />
+				<attribute name="Implementation-Version" value="${version}" />
+			</manifest>
+
+		</jar>
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: compile                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="compile">
+		<javac includeantruntime="false" srcdir="${src.dir}" destdir="${bin.dir}" debug="${debug}" />
+		<copy todir="${bin.dir}">
+			<fileset dir="${src.dir}">
+				<include name="**/*.*" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- ================================= 
+          target: clean              
+         ================================= -->
+	<target name="clean" depends="depends" description="description">
+		<delete dir="${bin.dir}" />
+		<delete dir="${target.dir}" />
+		<mkdir dir="${bin.dir}" />
+	</target>
+
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: depends                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="depends">
+	</target>
+
+</project>
