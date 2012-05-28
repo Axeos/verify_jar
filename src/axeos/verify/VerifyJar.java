@@ -49,7 +49,6 @@ public class VerifyJar {
 	}
 
 	private static String getBuildDate() {
-		String buildTime = null;
 		try {
 			URLClassLoader cl = (URLClassLoader) VerifyJar.class.getClassLoader();
 			URL url = cl.findResource("META-INF/MANIFEST.MF");
@@ -92,8 +91,6 @@ public class VerifyJar {
 	private String file;
 
 	private final JarSignatureValidator jv = new JarSignatureValidator();
-
-	private final Logger log = Logger.getLogger(VerifyJar.class.getName());
 
 	private void parseParameters(String[] args) {
 		for (int i = 0; i < args.length; i++) {
