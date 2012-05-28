@@ -80,6 +80,18 @@ keytool -keystore all.jks -storepass 123456 -importcert -noprompt -trustcacerts 
 keytool -keystore all.jks -storepass 123456 -importcert -noprompt -trustcacerts -alias ca2 -file ca2.crt
 keytool -keystore all.jks -storepass 123456 -importcert -noprompt -trustcacerts -alias expired_ca -file expired_ca.crt
 
+openssl pkcs12 -export -in sign1.crt -inkey sign1.key -name sign1 -out sign1.p12 -passout pass:123456
+keytool -importkeystore -destkeystore all.jks -deststorepass 123456 -srckeystore sign1.p12 -srcstoretype PKCS12 -srcstorepass 123456
+rm sign1.p12
 
+openssl pkcs12 -export -in sign2.crt -inkey sign2.key -name sign2 -out sign2.p12 -passout pass:123456
+keytool -importkeystore -destkeystore all.jks -deststorepass 123456 -srckeystore sign2.p12 -srcstoretype PKCS12 -srcstorepass 123456
+rm sign2.p12
 
+openssl pkcs12 -export -in bad_sign.crt -inkey bad_sign.key -name bad_sign -out bad_sign.p12 -passout pass:123456
+keytool -importkeystore -destkeystore all.jks -deststorepass 123456 -srckeystore bad_sign.p12 -srcstoretype PKCS12 -srcstorepass 123456
+rm bad_sign.p12
 
+openssl pkcs12 -export -in expired_sign.crt -inkey expired_sign.key -name expired_sign -out expired_sign.p12 -passout pass:123456
+keytool -importkeystore -destkeystore all.jks -deststorepass 123456 -srckeystore expired_sign.p12 -srcstoretype PKCS12 -srcstorepass 123456
+rm expired_sign.p12
