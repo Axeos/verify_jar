@@ -10,6 +10,7 @@
 		<tstamp>
 			<format property="build.time" pattern="dd-MM-yyyy hh:mm:ss.S" locale="en" />
 		</tstamp>
+		<mkdir dir="${target.dir}" />
 		<jar destfile="${target.dir}/verify_jar.jar">
 			<fileset dir="${bin.dir}">
 			</fileset>
