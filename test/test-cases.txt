@@ -1,0 +1,37 @@
+#
+# Test cases
+# 
+# Each case is described by three lines:
+# 1. Test name
+# 1. command line options
+# 2. expected exit code
+# 3. stdout regular expression
+# 4. stderr regular expression
+#
+# cases are separated by '--'
+#
+#
+No arguments
+
+255
+^$
+^Axeos Jar Verifier.*\nUsage:.*
+--
+Default keystore
+jars/sign1.jar
+1
+^not verified[^\n]*\n$
+^$
+--
+Good signature
+-trustedKeystore certs/trusted1.jks jars/sign1.jar
+0
+^verified\n$
+^$
+--
+Good signature, quiet
+-quiet -trustedKeystore certs/trusted1.jks jars/sign1.jar
+0
+^$
+^$
+--
