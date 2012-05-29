@@ -65,7 +65,6 @@ public class VerifyJar {
 	}
 
 	public static void main(String[] args) throws Exception {
-
 		VerifyJar v = new VerifyJar();
 		v.parseParameters(args);
 		if (v.file == null) {
@@ -87,6 +86,7 @@ public class VerifyJar {
 		System.out.println("  -crl <file>  :  ");
 		System.out.println("  -skipUsage  :  ");
 		System.out.println("  -quiet  :  ");
+		System.out.println("  -skip-trust-check  :  ");
 		System.out.println("  -time <time>  :  format: yyyy-MM-dd[ HH:mm[:ss[.S]]]");
 	}
 
@@ -123,7 +123,9 @@ public class VerifyJar {
 	private void parseParameters(String[] args) {
 		for (int i = 0; i < args.length; i++) {
 			String par = args[i];
-			if ("-date".equalsIgnoreCase(par)) {
+			if ("-skip-trust-check".equalsIgnoreCase(par)) {
+				jv.setSkipTrustCheck(true);
+			} else if ("-date".equalsIgnoreCase(par)) {
 				String d = args[++i];
 				if (i + 1 < args.length && !args[i + 1].startsWith("-")) {
 					d += " " + args[++i];
@@ -192,7 +194,7 @@ public class VerifyJar {
 				break;
 			default:
 				if (!quiet)
-					System.out.println("not verified.");
+					System.out.println("not-verified");
 				System.exit(2);
 				break;
 			}

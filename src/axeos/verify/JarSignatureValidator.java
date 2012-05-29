@@ -1,5 +1,6 @@
 package axeos.verify;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -58,6 +59,8 @@ public class JarSignatureValidator {
 
 	private boolean skipCertUsage = false;
 
+	private boolean skipTrustCheck = false;
+
 	private String trustedKeystore;
 
 	private boolean useOCSP;
@@ -78,11 +81,16 @@ public class JarSignatureValidator {
 		return trustedKeystore;
 	}
 
+	public Date getVerificationDate() {
+		return verificationDate;
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initPathValdiator() throws NoSuchAlgorithmException, KeyStoreException, CertificateException,
 			FileNotFoundException, IOException, InvalidAlgorithmParameterException, CRLException {
-		if (trustedKeystore == null) {
-			log.fine("  No trusted keystore. Certificate path validation skiped.");
+
+		if (skipTrustCheck) {
+			log.fine("Certificate path validation skiped.");
 			this.validator = null;
 			return;
 		}
@@ -93,9 +101,7 @@ public class JarSignatureValidator {
 
 		CertPathValidator validator = CertPathValidator.getInstance("PKIX");
 
-		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-
-		keystore.load(new FileInputStream(trustedKeystore), null);
+		KeyStore keystore = loadKeystore();
 
 		this.params = new PKIXParameters(keystore);
 		if (verificationDate != null) {
@@ -146,8 +152,42 @@ public class JarSignatureValidator {
 		return skipCertUsage;
 	}
 
+	public boolean isSkipTrustCheck() {
+		return skipTrustCheck;
+	}
+
 	public boolean isUseOCSP() {
 		return useOCSP;
+	}
+
+	private KeyStore loadKeystore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+			FileNotFoundException, IOException {
+		final File tuststore = new File(System.getProperty("java.home")
+				+ "/lib/security/cacerts".replace('/', File.separatorChar));
+		final File userStore = new File("~/.keystore");
+
+		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+		if (trustedKeystore != null) {
+			File f = new File(trustedKeystore);
+			if (!f.exists()) {
+				System.out.println("Keystore '" + f + "' does not exists!");
+				System.out.println(-2);
+			}
+			log.fine("Using keystore: " + f);
+			keystore.load(new FileInputStream(f), null);
+		} else if (userStore.exists()) {
+			log.fine("Using keystore: " + userStore);
+			keystore.load(new FileInputStream(userStore), null);
+		} else if (tuststore.exists()) {
+			log.fine("Using keystore: " + tuststore);
+			keystore.load(new FileInputStream(tuststore), null);
+		} else {
+			System.out.println("Not found keystore. Use -skip-trust-check");
+			System.out.println(-2);
+		}
+
+		return keystore;
 	}
 
 	public void setOcspResponderURL(String ocspResponderURL) {
@@ -158,12 +198,20 @@ public class JarSignatureValidator {
 		this.skipCertUsage = skipCertUsage;
 	}
 
+	public void setSkipTrustCheck(boolean b) {
+		this.skipTrustCheck = b;
+	}
+
 	public void setTrustedKeystore(String trustedKeystore) {
 		this.trustedKeystore = trustedKeystore;
 	}
 
 	public void setUseOCSP(boolean useOCSP) {
 		this.useOCSP = useOCSP;
+	}
+
+	public void setVerificationDate(Date verificationDate) {
+		this.verificationDate = verificationDate;
 	}
 
 	private void validatePath(CertPath path) throws NoSuchAlgorithmException, KeyStoreException,
@@ -325,14 +373,6 @@ public class JarSignatureValidator {
 		if (log.isLoggable(Level.FINE))
 			log.fine("File verified");
 		return Result.verified;
-	}
-
-	public void setVerificationDate(Date verificationDate) {
-		this.verificationDate = verificationDate;
-	}
-
-	public Date getVerificationDate() {
-		return verificationDate;
 	}
 
 }
