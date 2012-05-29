@@ -80,18 +80,18 @@ public class VerifyJar {
 
 	private static void showHelp() {
 		String dt = getBuildDate();
-		System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
-		System.out.println("Usage:");
-		System.out.println("   verify_jar <parameters> <jar_file>");
-		System.out.println("Parameters:");
-		System.out.println("  -trustedKeystore <file>  :  ");
-		System.out.println("  -ocsp  :  ");
-		System.out.println("  -ocspResponder <url> :  ");
-		System.out.println("  -crl <file>  :  ");
-		System.out.println("  -skipUsage  :  ");
-		System.out.println("  -quiet  :  ");
-		System.out.println("  -skip-trust-check  :  ");
-		System.out.println("  -time <time>  :  format: yyyy-MM-dd[ HH:mm[:ss[.S]]]");
+		System.err.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
+		System.err.println("Usage:");
+		System.err.println("   verify_jar <parameters> <jar_file>");
+		System.err.println("Parameters:");
+		System.err.println("  -trustedKeystore <file>  :  ");
+		System.err.println("  -ocsp  :  ");
+		System.err.println("  -ocspResponder <url> :  ");
+		System.err.println("  -crl <file>  :  ");
+		System.err.println("  -skipUsage  :  ");
+		System.err.println("  -quiet  :  ");
+		System.err.println("  -skip-trust-check  :  ");
+		System.err.println("  -time <time>  :  format: yyyy-MM-dd[ HH:mm[:ss[.S]]]");
 	}
 
 	private String file;
