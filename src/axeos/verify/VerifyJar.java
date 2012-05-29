@@ -48,6 +48,10 @@ public class VerifyJar {
 		}
 	}
 
+	public static final String NOT_VERIFIED = "not-verified";
+
+	public static final String VERIFIED = "verified";
+
 	private static String getBuildDate() {
 		try {
 			URLClassLoader cl = (URLClassLoader) VerifyJar.class.getClassLoader();
@@ -166,41 +170,41 @@ public class VerifyJar {
 			switch (res) {
 			case verified:
 				if (!quiet) {
-					System.out.println("verified");
+					System.out.println(VERIFIED);
 				}
 				System.exit(0);
 				break;
 			case expiredCertificate:
 				if (!quiet) {
 					System.out.println("expired certificate");
-					System.out.println("not-verified");
+					System.out.println(NOT_VERIFIED);
 				}
 				System.exit(1);
 				break;
 			case hasUnsignedEntries:
 				if (!quiet) {
 					System.out.println("contains unsigned entries");
-					System.out.println("not-verified");
+					System.out.println(NOT_VERIFIED);
 				}
 				System.exit(2);
 				break;
 			case notSigned:
 				if (!quiet) {
 					System.out.println("not signed");
-					System.out.println("not-verified");
+					System.out.println(NOT_VERIFIED);
 				}
 				System.exit(2);
 				break;
 			case invalidCertificate:
 				if (!quiet) {
 					System.out.println("certificate not valid");
-					System.out.println("not-verified");
+					System.out.println(NOT_VERIFIED);
 				}
 				System.exit(2);
 				break;
 			default:
 				if (!quiet) {
-					System.out.println("not-verified");
+					System.out.println(NOT_VERIFIED);
 				}
 				System.exit(2);
 				break;
@@ -209,7 +213,7 @@ public class VerifyJar {
 		} catch (Throwable e) {
 			if (!quiet)
 				e.printStackTrace();
-			System.out.println("not-verified");
+			System.out.println(NOT_VERIFIED);
 			System.exit(2);
 		}
 	}
