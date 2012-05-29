@@ -68,10 +68,6 @@ public class VerifyJar {
 
 		VerifyJar v = new VerifyJar();
 		v.parseParameters(args);
-		if (!v.quiet) {
-			String dt = getBuildDate();
-			System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
-		}
 		if (v.file == null) {
 			showHelp();
 			System.exit(-1);
@@ -80,6 +76,8 @@ public class VerifyJar {
 	}
 
 	private static void showHelp() {
+		String dt = getBuildDate();
+		System.out.println("Axeos Jar Verifier " + getVersion() + (dt == null ? "" : (" (" + dt + ")")));
 		System.out.println("Usage:");
 		System.out.println("   verify_jar <parameters> <jar_file>");
 		System.out.println("Parameters:");
