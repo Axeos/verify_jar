@@ -48,7 +48,7 @@ public class VerifyJar {
 		}
 	}
 
-	public static final String NOT_VERIFIED = "not-verified";
+	public static final String NOT_VERIFIED = "not verified";
 
 	public static final String VERIFIED = "verified";
 
@@ -176,29 +176,25 @@ public class VerifyJar {
 				break;
 			case expiredCertificate:
 				if (!quiet) {
-					System.out.println("expired certificate");
-					System.out.println(NOT_VERIFIED);
+					System.out.println(NOT_VERIFIED + ". expired certificate");
 				}
 				System.exit(1);
 				break;
 			case hasUnsignedEntries:
 				if (!quiet) {
-					System.out.println("contains unsigned entries");
-					System.out.println(NOT_VERIFIED);
+					System.out.println(NOT_VERIFIED + ". contains unsigned entries");
 				}
 				System.exit(2);
 				break;
 			case notSigned:
 				if (!quiet) {
-					System.out.println("not signed");
-					System.out.println(NOT_VERIFIED);
+					System.out.println(NOT_VERIFIED + ". not signed");
 				}
 				System.exit(2);
 				break;
 			case invalidCertificate:
 				if (!quiet) {
-					System.out.println("certificate not valid");
-					System.out.println(NOT_VERIFIED);
+					System.out.println(NOT_VERIFIED + ". certificate not valid");
 				}
 				System.exit(2);
 				break;
