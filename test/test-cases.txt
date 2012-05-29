@@ -19,9 +19,9 @@ No arguments
 --
 Default keystore
 jars/sign1.jar
-1
+2
 ^not verified[^\n]*\n$
-^$
+^.*$
 --
 Good signature
 -trustedKeystore certs/trusted1.jks jars/sign1.jar
