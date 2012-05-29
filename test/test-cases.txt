@@ -35,3 +35,75 @@ Good signature, quiet
 ^$
 ^$
 --
+Good signature, not trusted #1
+-trustedKeystore certs/trusted2.jks jars/sign1.jar
+2
+^not verified[^\n]*\n$
+^$
+--
+Good signature, not trusted #2
+-trustedKeystore certs/trusted1.jks jars/sign2.jar
+2
+^not verified[^\n]*\n$
+^$
+--
+Good signature, not trusted, but trust not checked
+-skip-trust-check jars/sign1.jar
+0
+^verified\n$
+^$
+--
+Bad signature key usage
+-trustedKeystore certs/all.jks jars/bad_sign.jar
+2
+^not verified[^\n]*\n$
+# the problem should be reported to stderr
+^.+$
+--
+Bad signature key usage, ignored
+-skipUsage -trustedKeystore certs/all.jks jars/bad_sign.jar
+0
+^verified$
+# the problem should be reported to stderr
+^.+$
+--
+Signer expired and no timestamp
+-trustedKeystore certs/all.jks jars/expired_sign.jar
+1
+^not verified[^\n]*\n$
+# the problem should be reported to stderr
+^.+$
+--
+Signer expired, but timestamp ok
+-trustedKeystore certs/all.jks jars/expired_sign_tsa1.jar
+0
+^verified\n$
+^$
+--
+Signer expired and the timestamp expired
+-trustedKeystore certs/all.jks jars/expired_sign_expired_tsa.jar
+1
+^not verified[^\n]*\n$
+# the problem should be reported to stderr
+^.+$
+--
+Timestamp expired, but signer ok
+-trustedKeystore certs/all.jks jars/sign1_expired_tsa.jar
+0
+^verified\n$
+# the problem should be reported to stderr
+^.+$
+--
+Timestamp not trusted, but signer ok
+-trustedKeystore certs/trusted1.jks jars/sign1_tsa2.jar
+0
+^verified\n$
+# the problem should be reported to stderr
+^.+$
+--
+Signer expired and the timestamp not trusted
+-trustedKeystore certs/trusted1.jks jars/expired_sign_tsa2.jar
+1
+^not verified[^\n]*\n$
+# the problem should be reported to stderr
+^.+$
