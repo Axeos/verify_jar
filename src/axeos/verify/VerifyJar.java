@@ -137,6 +137,7 @@ public class VerifyJar {
 				jv.setVerificationDate(parseDate(d));
 			} else if ("-quiet".equalsIgnoreCase(par)) {
 				quiet = true;
+				jv.setQuiet(quiet);
 			} else if ("-debug".equalsIgnoreCase(par)) {
 				Logger logger = Logger.getLogger("");
 				Handler handler = new ConsoleHandler();
@@ -174,43 +175,54 @@ public class VerifyJar {
 				}
 				System.exit(0);
 				break;
-			case expiredCertificate:
-				if (!quiet) {
-					System.out.println(NOT_VERIFIED + ". expired certificate");
-				}
-				System.exit(1);
-				break;
 			case hasUnsignedEntries:
 				if (!quiet) {
-					System.out.println(NOT_VERIFIED + ". contains unsigned entries");
+					System.out.println(NOT_VERIFIED);
+					System.err.println("contains unsigned entries");
 				}
 				System.exit(2);
 				break;
 			case notSigned:
 				if (!quiet) {
-					System.out.println(NOT_VERIFIED + ". not signed");
+					System.out.println(NOT_VERIFIED);
+					System.err.println("not signed");
+				}
+				System.exit(3);
+				break;
+			case badUsage: {
+				if (!quiet) {
+					System.out.println(NOT_VERIFIED);
+					System.err.println("bad usage");
 				}
 				System.exit(2);
 				break;
+			}
 			case invalidCertificate:
 				if (!quiet) {
 					System.out.println(NOT_VERIFIED + ". certificate not valid");
 				}
 				System.exit(2);
 				break;
+			case expiredCertificate:
+				if (!quiet) {
+					System.out.println(NOT_VERIFIED + ". certificate expired");
+				}
+				System.exit(1);
+				break;
 			default:
 				if (!quiet) {
-					System.out.println(NOT_VERIFIED);
+					System.err.println(NOT_VERIFIED);
 				}
-				System.exit(2);
+				System.exit(5);
 				break;
 			}
 
 		} catch (Throwable e) {
-			if (!quiet)
+			if (!quiet) {
 				e.printStackTrace();
+			}
 			System.out.println(NOT_VERIFIED);
-			System.exit(2);
+			System.exit(6);
 		}
 	}
 }

@@ -21,7 +21,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.PKIXCertPathValidatorResult;
@@ -40,6 +39,7 @@ import java.util.logging.Logger;
 public class JarSignatureValidator {
 
 	public static enum Result {
+		badUsage,
 		expiredCertificate,
 		hasUnsignedEntries,
 		invalidCertificate,
@@ -56,6 +56,8 @@ public class JarSignatureValidator {
 	private String ocspResponderURL;
 
 	private PKIXParameters params;
+
+	private boolean quiet = false;
 
 	private boolean skipCertUsage = false;
 
@@ -135,6 +137,10 @@ public class JarSignatureValidator {
 		return extUsage != null && (extUsage.contains("2.5.29.37.0") || extUsage.contains("1.3.6.1.5.5.7.3.3"));
 	}
 
+	public boolean isQuiet() {
+		return quiet;
+	}
+
 	private boolean isSignatureRelatedFilename(String filename) {
 		String tmp = filename.toUpperCase();
 		if (tmp.equals(JarFile.MANIFEST_NAME) || tmp.equals("META-INF/")
@@ -194,6 +200,10 @@ public class JarSignatureValidator {
 		this.ocspResponderURL = ocspResponderURL;
 	}
 
+	public void setQuiet(boolean quiet) {
+		this.quiet = quiet;
+	}
+
 	public void setSkipCertUsage(boolean skipCertUsage) {
 		this.skipCertUsage = skipCertUsage;
 	}
@@ -237,7 +247,6 @@ public class JarSignatureValidator {
 
 		boolean anySigned = false;
 		boolean hasUnsignedEntry = false;
-		boolean hasExpiredCert = false;
 
 		initPathValdiator();
 		// -------
@@ -294,10 +303,12 @@ public class JarSignatureValidator {
 						try {
 							log.finer("  Validating timestamp certificate path");
 							validatePath(cp);
+							params.setDate(timestamp.getTimestamp());
 						} catch (Exception e) {
-							log.fine("Timestamp certificate is not valid");
-							return Result.invalidSignature;
+							System.err.println("Timestamp: " + e.getMessage());
+							log.log(Level.FINE, "Timestamp certificate is not valid", e);
 						}
+
 					}
 
 					List<Certificate> x = new ArrayList<Certificate>();
@@ -306,14 +317,6 @@ public class JarSignatureValidator {
 					}
 					CertPath path = CertificateFactory.getInstance("X.509").generateCertPath(x);
 
-					try {
-						log.finest("Validating signer certificate path");
-						validatePath(path);
-					} catch (Exception e) {
-						log.fine("Certificate path can't be verified!");
-						return Result.invalidCertificate;
-					}
-
 					if (cert instanceof X509Certificate) {
 
 						if (log.isLoggable(Level.FINEST)) {
@@ -321,39 +324,32 @@ public class JarSignatureValidator {
 									+ "; Subject: " + ((X509Certificate) cert).getSubjectDN());
 						}
 						boolean correctUsage = isCertForCodeSigning((X509Certificate) cert);// TODO
+						if (!correctUsage)
+							System.err.println("Bad usage");
 
 						if (!skipCertUsage && !correctUsage) {
 							log.fine("Certificate can't be used to signing code");
-							return Result.invalidCertificate;
-						}
-
-						try {
-							if (timestamp != null) {
-								log.finest("  validating certificate validity (time from signature timestamp): "
-										+ timestamp.getTimestamp());
-								((X509Certificate) cert).checkValidity(timestamp.getTimestamp());
-							} else if (verificationDate != null) {
-								log.finest("  validating certificate validity (time from user): " + verificationDate);
-								((X509Certificate) cert).checkValidity(verificationDate);
-							} else {
-								log.finest("  validating certificate validity (current time)");
-								((X509Certificate) cert).checkValidity();
-							}
-						} catch (CertificateNotYetValidException e) {
-							hasExpiredCert = true;
-						} catch (CertificateExpiredException e) {
-							hasExpiredCert = true;
-						}
-
-						if (hasExpiredCert) {
-							log.fine("Certificate is expired");
-							return Result.expiredCertificate;
+							return Result.badUsage;
 						}
 
 						if (log.isLoggable(Level.FINEST)) {
-							log.finest("  usage: " + (correctUsage ? "correct" : "incorrect") + "; expired: " + hasExpiredCert
-									+ ";");
+							log.finest("  usage: " + (correctUsage ? "correct" : "incorrect") + ";");
 						}
+					}
+
+					try {
+						log.finest("Validating signer certificate path");
+						validatePath(path);
+					} catch (Exception e) {
+						System.err.println(e.getMessage());
+
+						if (e.getCause() instanceof CertificateExpiredException) {
+							System.err.println(e.getCause().getMessage());
+							return Result.expiredCertificate;
+						}
+
+						log.log(Level.FINE, "Certificate path can't be verified!", e);
+						return Result.invalidCertificate;
 					}
 				}
 			}
