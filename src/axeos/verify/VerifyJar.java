@@ -14,8 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import axeos.verify.JarSignatureValidator.Result;
-
 public class VerifyJar {
 
 	private static class MyFormatter extends Formatter {
@@ -166,61 +164,61 @@ public class VerifyJar {
 
 	private void run() {
 		try {
-			Result res = jv.verifyJar(new JarFile(file));
-
-			switch (res) {
-			case verified:
-				if (!quiet) {
-					System.out.println(VERIFIED);
-				}
-				System.exit(0);
-				break;
+			jv.verifyJar(new JarFile(file));
+			if (!quiet) {
+				System.out.println(VERIFIED);
+			}
+			System.exit(0);
+		} catch (ValidatorException e) {
+			String errMsg = null;
+			String outMsg = null;
+			int code;
+			switch (e.getResult()) {
 			case hasUnsignedEntries:
-				if (!quiet) {
-					System.out.println(NOT_VERIFIED);
-					System.err.println("contains unsigned entries");
-				}
-				System.exit(2);
+				System.out.println(NOT_VERIFIED);
+				errMsg = "contains unsigned entries";
+				code = 2;
 				break;
 			case notSigned:
-				if (!quiet) {
-					System.out.println(NOT_VERIFIED);
-					System.err.println("not signed");
-				}
-				System.exit(2);
+				errMsg = "not signed";
+				code = 2;
 				break;
-			case badUsage: {
-				if (!quiet) {
-					System.out.println(NOT_VERIFIED);
-					System.err.println("bad usage");
-				}
-				System.exit(2);
+			case badUsage:
+				errMsg = "bad usage";
+				code = 2;
 				break;
-			}
 			case invalidCertificate:
-				if (!quiet) {
-					System.out.println(NOT_VERIFIED + ". certificate not valid");
-				}
-				System.exit(2);
+				outMsg = "certificate not valid";
+				code = 2;
 				break;
 			case expiredCertificate:
-				if (!quiet) {
-					System.out.println(NOT_VERIFIED + ". certificate expired");
-				}
-				System.exit(1);
+				outMsg = "certificate expired";
+				code = 1;
 				break;
 			default:
-				if (!quiet) {
-					System.err.println(NOT_VERIFIED);
-				}
-				System.exit(3);
+				code = 3;
+				outMsg = null;
+				errMsg = null;
 				break;
 			}
-		} catch (ValidatorException e) {
-			System.out.println(NOT_VERIFIED + (e.getStdOutMessage() == null ? "" : ". " + e.getStdOutMessage()));
+
+			System.out.print(NOT_VERIFIED);
+			if (e.getStdErrMessage() != null)
+				System.out.println(". " + e.getStdErrMessage());
+			else if (outMsg != null)
+				System.out.println(". " + outMsg);
+			else
+				System.out.println();
+
 			if (e.getStdErrMessage() != null)
 				System.err.println(e.getStdErrMessage());
-			System.exit(e.getExitCode());
+			else if (errMsg != null)
+				System.err.println(errMsg);
+
+			if (e.getExitCode() != -1)
+				System.exit(e.getExitCode());
+			else
+				System.exit(code);
 
 		} catch (Throwable e) {
 			if (!quiet) {

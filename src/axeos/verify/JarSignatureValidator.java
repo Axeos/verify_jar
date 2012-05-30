@@ -254,7 +254,7 @@ public class JarSignatureValidator {
 		}
 	}
 
-	public Result verifyJar(final JarFile jarFile) throws IOException, KeyStoreException, CertificateException,
+	public void verifyJar(final JarFile jarFile) throws IOException, KeyStoreException, CertificateException,
 			NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertPathValidatorException, CRLException,
 			ValidatorException {
 		byte[] buffer = new byte[8192];
@@ -287,7 +287,7 @@ public class JarSignatureValidator {
 			} catch (java.lang.SecurityException e) {
 				if (log.isLoggable(Level.FINEST))
 					log.log(Level.FINEST, "  Invalid signature!!!", e);
-				return Result.invalidSignature;
+				throw new ValidatorException(Result.invalidSignature);
 			} finally {
 				if (is != null) {
 					is.close();
@@ -343,7 +343,7 @@ public class JarSignatureValidator {
 
 						if (!skipCertUsage && !correctUsage) {
 							log.fine("Certificate can't be used to signing code");
-							return Result.badUsage;
+							throw new ValidatorException(Result.badUsage);
 						}
 
 						if (log.isLoggable(Level.FINEST)) {
@@ -358,15 +358,13 @@ public class JarSignatureValidator {
 						System.err.println(e.getMessage());
 
 						if (e instanceof CertificateExpiredException) {
-							System.err.println(e.getMessage());
-							return Result.expiredCertificate;
+							throw new ValidatorException(Result.expiredCertificate, null, e.getMessage());
 						} else if (e.getCause() instanceof CertificateExpiredException) {
-							System.err.println(e.getCause().getMessage());
-							return Result.expiredCertificate;
+							throw new ValidatorException(Result.expiredCertificate, null, e.getMessage());
 						}
 
 						log.log(Level.FINE, "Certificate path can't be verified!", e);
-						return Result.invalidCertificate;
+						throw new ValidatorException(Result.invalidCertificate);
 					}
 				}
 			}
@@ -376,16 +374,15 @@ public class JarSignatureValidator {
 		if (!anySigned) {
 			if (log.isLoggable(Level.FINE))
 				log.fine("File is not signed");
-			return Result.notSigned;
+			throw new ValidatorException(Result.notSigned);
 		} else if (hasUnsignedEntry) {
 			if (log.isLoggable(Level.FINE))
 				log.fine("File contains unsigned entries!");
-			return Result.hasUnsignedEntries;
+			throw new ValidatorException(Result.hasUnsignedEntries);
 		}
 
 		if (log.isLoggable(Level.FINE))
 			log.fine("File verified");
-		return Result.verified;
 	}
 
 }
