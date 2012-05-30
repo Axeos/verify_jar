@@ -216,6 +216,11 @@ public class VerifyJar {
 				System.exit(3);
 				break;
 			}
+		} catch (ValidatorException e) {
+			System.out.println(NOT_VERIFIED + (e.getStdOutMessage() == null ? "" : ". " + e.getStdOutMessage()));
+			if (e.getStdErrMessage() != null)
+				System.err.println(e.getStdErrMessage());
+			System.exit(e.getExitCode());
 
 		} catch (Throwable e) {
 			if (!quiet) {

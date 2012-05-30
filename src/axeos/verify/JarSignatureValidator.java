@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.security.CodeSigner;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
+import java.security.KeyStore.LoadStoreParameter;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
@@ -89,7 +90,7 @@ public class JarSignatureValidator {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initPathValdiator() throws NoSuchAlgorithmException, KeyStoreException, CertificateException,
-			FileNotFoundException, IOException, InvalidAlgorithmParameterException, CRLException {
+			FileNotFoundException, IOException, InvalidAlgorithmParameterException, CRLException, ValidatorException {
 
 		if (skipTrustCheck) {
 			log.fine("Certificate path validation skiped.");
@@ -105,7 +106,13 @@ public class JarSignatureValidator {
 
 		KeyStore keystore = loadKeystore();
 
-		this.params = new PKIXParameters(keystore);
+		try {
+			this.params = new PKIXParameters(keystore);
+		} catch (InvalidAlgorithmParameterException e) {
+			throw new ValidatorException(Result.invalidCertificate, -1, null,
+					"Path does not chain with any of the trust anchors");
+		}
+
 		if (verificationDate != null) {
 			log.fine("Using verification date: " + verificationDate);
 			this.params.setDate(verificationDate);
@@ -189,8 +196,8 @@ public class JarSignatureValidator {
 			log.fine("Using keystore: " + tuststore);
 			keystore.load(new FileInputStream(tuststore), null);
 		} else {
-			System.err.println("Not found keystore. Use -skip-trust-check");
-			System.exit(4);
+			LoadStoreParameter p = null;
+			keystore.load(p);
 		}
 
 		return keystore;
@@ -248,7 +255,8 @@ public class JarSignatureValidator {
 	}
 
 	public Result verifyJar(final JarFile jarFile) throws IOException, KeyStoreException, CertificateException,
-			NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertPathValidatorException, CRLException {
+			NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertPathValidatorException, CRLException,
+			ValidatorException {
 		byte[] buffer = new byte[8192];
 
 		boolean anySigned = false;
