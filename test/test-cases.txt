@@ -39,13 +39,13 @@ Good signature, not trusted #1
 -trustedKeystore certs/trusted2.jks jars/sign1.jar
 2
 ^not verified[^\n]*\n$
-^$
+^.*$
 --
 Good signature, not trusted #2
 -trustedKeystore certs/trusted1.jks jars/sign2.jar
 2
 ^not verified[^\n]*\n$
-^$
+^.*$
 --
 Good signature, not trusted, but trust not checked
 -skip-trust-check jars/sign1.jar
