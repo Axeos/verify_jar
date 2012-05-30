@@ -187,7 +187,7 @@ public class VerifyJar {
 					System.out.println(NOT_VERIFIED);
 					System.err.println("not signed");
 				}
-				System.exit(3);
+				System.exit(2);
 				break;
 			case badUsage: {
 				if (!quiet) {
@@ -213,7 +213,7 @@ public class VerifyJar {
 				if (!quiet) {
 					System.err.println(NOT_VERIFIED);
 				}
-				System.exit(5);
+				System.exit(3);
 				break;
 			}
 
@@ -222,7 +222,7 @@ public class VerifyJar {
 				e.printStackTrace();
 			}
 			System.out.println(NOT_VERIFIED);
-			System.exit(6);
+			System.exit(4);
 		}
 	}
 }
