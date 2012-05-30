@@ -236,6 +236,12 @@ public class JarSignatureValidator {
 		if (result == null)
 			throw new RuntimeException("No result???");
 
+		if (params.getDate() == null) {
+			result.getTrustAnchor().getTrustedCert().checkValidity();
+		} else {
+			result.getTrustAnchor().getTrustedCert().checkValidity(params.getDate());
+		}
+
 		if (log.isLoggable(Level.FINEST)) {
 			log.finest("  path valid");
 		}
@@ -343,7 +349,10 @@ public class JarSignatureValidator {
 					} catch (Exception e) {
 						System.err.println(e.getMessage());
 
-						if (e.getCause() instanceof CertificateExpiredException) {
+						if (e instanceof CertificateExpiredException) {
+							System.err.println(e.getMessage());
+							return Result.expiredCertificate;
+						} else if (e.getCause() instanceof CertificateExpiredException) {
 							System.err.println(e.getCause().getMessage());
 							return Result.expiredCertificate;
 						}
