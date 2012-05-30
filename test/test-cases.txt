@@ -102,7 +102,7 @@ Timestamp not trusted, but signer ok
 ^.+$
 --
 Signer expired and the timestamp not trusted
--trustedKeystore certs/trusted1.jks jars/expired_sign_tsa2.jar
+-trustedKeystore certs/expired.jks jars/expired_sign_tsa2.jar
 1
 ^not verified[^\n]*\n$
 # the problem should be reported to stderr
