@@ -177,8 +177,8 @@ public class JarSignatureValidator {
 		if (trustedKeystore != null) {
 			File f = new File(trustedKeystore);
 			if (!f.exists()) {
-				System.out.println("Keystore '" + f + "' does not exists!");
-				System.out.println(-2);
+				System.err.println("Keystore '" + f + "' does not exists!");
+				System.exit(4);
 			}
 			log.fine("Using keystore: " + f);
 			keystore.load(new FileInputStream(f), null);
@@ -189,8 +189,8 @@ public class JarSignatureValidator {
 			log.fine("Using keystore: " + tuststore);
 			keystore.load(new FileInputStream(tuststore), null);
 		} else {
-			System.out.println("Not found keystore. Use -skip-trust-check");
-			System.out.println(-2);
+			System.err.println("Not found keystore. Use -skip-trust-check");
+			System.exit(4);
 		}
 
 		return keystore;
