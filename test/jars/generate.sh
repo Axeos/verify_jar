@@ -63,6 +63,12 @@ if [ ! -f expired_sign_tsa1.jar -a -n "$TSA1_URL" ] ; then
 	jarsigner -keystore ../certs/all.jks -storepass 123456 -tsa "$TSA1_URL" expired_sign_tsa1.jar expired_sign
 fi
 
+if [ ! -f expired_sign_tsa2.jar -a -n "$TSA2_URL" ] ; then
+	cp input.jar expired_sign_tsa2.jar
+	jarsigner -keystore ../certs/all.jks -storepass 123456 -tsa "$TSA2_URL" expired_sign_tsa2.jar expired_sign
+fi
+
+
 if [ ! -f expired_sign_expired_tsa.jar -a -n "$EXPIRED_TSA_URL" ] ; then
 	cp input.jar expired_sign_expired_tsa.jar
 	jarsigner -keystore ../certs/all.jks -storepass 123456 -tsa "$EXPIRED_TSA_URL" expired_sign_expired_tsa.jar expired_sign
