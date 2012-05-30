@@ -68,6 +68,14 @@ if [ ! -f expired_sign.crt ] ; then
 	rm -f expired_sign.req
 fi
 
+if [ ! -f expired_ca_sign.crt ] ; then
+	openssl req -new -batch -config expired_ca_sign.cnf -nodes -keyout expired_ca_sign.key -out expired_ca_sign.req && \
+	openssl x509 -extfile expired_ca_sign.cnf -extensions ext -days 3650 -req -in expired_ca_sign.req -out expired_ca_sign.crt \
+       		-set_serial 03 -CA expired_ca.crt -CAkey expired_ca.key && \
+	rm -f expired_ca_sign.req
+fi
+
+
 rm -f trusted1.jks || :
 rm -f trusted2.jks || :
 rm -f expired.jks || :
@@ -95,3 +103,7 @@ rm bad_sign.p12
 openssl pkcs12 -export -in expired_sign.crt -inkey expired_sign.key -name expired_sign -out expired_sign.p12 -passout pass:123456
 keytool -importkeystore -destkeystore all.jks -deststorepass 123456 -srckeystore expired_sign.p12 -srcstoretype PKCS12 -srcstorepass 123456
 rm expired_sign.p12
+
+openssl pkcs12 -export -in expired_ca_sign.crt -inkey expired_ca_sign.key -name expired_ca_sign -out expired_ca_sign.p12 -passout pass:123456
+keytool -importkeystore -destkeystore all.jks -deststorepass 123456 -srckeystore expired_ca_sign.p12 -srcstoretype PKCS12 -srcstorepass 123456
+rm expired_ca_sign.p12

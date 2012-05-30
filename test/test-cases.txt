@@ -107,3 +107,10 @@ Signer expired and the timestamp not trusted
 ^not verified[^\n]*\n$
 # the problem should be reported to stderr
 ^.+$
+--
+Signer's CA expired and the timestamp not trusted
+-trustedKeystore certs/expired.jks jars/expired_ca_sign_tsa2.jar
+1
+^not verified[^\n]*\n$
+# the problem should be reported to stderr
+^.+$
