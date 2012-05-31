@@ -12,7 +12,7 @@ if [ ! -f input.jar ] ; then
 	echo "one" > one.txt
 	echo "two" > two.txt
 	mkdir dir
-	echo "three" dir/three.txt
+	echo "three" > dir/three.txt
 	jar cf ../input.jar *
 	cd ..
         rm -r "$dir"
