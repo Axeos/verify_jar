@@ -84,7 +84,10 @@ if [ ! -f expired_sign_expired_tsa.jar -a -n "$EXPIRED_TSA_URL" ] ; then
 	jarsigner -keystore ../certs/all.jks -storepass 123456 -tsa "$EXPIRED_TSA_URL" expired_sign_expired_tsa.jar expired_sign
 fi
 
-
-
-
-
+if [ ! -f unsigned_file.jar ] ; then
+	cp sign1.jar unsigned_file.jar
+	dir=$(mktemp -d tmp.XXXXXXXXXX)
+	echo "four" > $dir/four.txt
+	jar uf unsigned_file.jar -C "$dir" four.txt
+        rm -r "$dir"
+fi

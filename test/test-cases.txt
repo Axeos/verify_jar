@@ -114,3 +114,9 @@ Signer's CA expired and the timestamp not trusted
 ^not verified[^\n]*\n$
 # the problem should be reported to stderr
 ^.+$
+--
+Good signature, but jar includes an unsigned file
+-trustedKeystore certs/trusted1.jks jars/unsigned_file.jar
+2
+^not verified\n$
+^contains unsigned entries\n$
