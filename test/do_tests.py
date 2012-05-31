@@ -6,13 +6,26 @@ import sys
 import subprocess
 import re
 
+if "-v" in sys.argv[1:]:
+    verbose = True
+else:
+    verbose = False
+
 def run_test(test_name, test_args, test_status, test_stdout, test_stderr):
     print("{0}: ".format(test_name), end="")
-    command = subprocess.Popen(
-            ["java", "-jar", "../target/verify_jar.jar"] + test_args,
-            stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    cmd = ["java", "-jar", "../target/verify_jar.jar"] + test_args
+    if verbose:
+        print()
+        print("  running command:", repr(" ".join(cmd)))
+    command = subprocess.Popen(cmd, stdout = subprocess.PIPE,
+                                                    stderr = subprocess.PIPE)
     stdout, stderr = command.communicate()
-    rc = command.wait()
+    rc = command.returncode
+    if verbose:
+        print("  stdout:", repr(stdout))
+        print("  stderr:", repr(stderr))
+        print("  rc    :", rc)
+        print("... ", end="")
     errors = []
     if test_status != rc:
         errors.append(
@@ -27,10 +40,13 @@ def run_test(test_name, test_args, test_status, test_stdout, test_stderr):
         print("fail")
         for error in errors:
             print ("  " + error, file=sys.stderr)
-        return False
+        result = False
     else:
         print("ok")
-        return True
+        result = True
+    if verbose:
+        print("--")
+    return result
 
 def read_not_comment(file_obj):
     while True:
