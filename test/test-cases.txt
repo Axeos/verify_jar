@@ -21,7 +21,7 @@ Default keystore
 jars/sign1.jar
 2
 ^not verified[^\n]*\n$
-^.*$
+^Path does not chain with any of the trust anchors\n$
 --
 Good signature
 -trustedKeystore certs/trusted1.jks jars/sign1.jar
@@ -39,13 +39,13 @@ Good signature, not trusted #1
 -trustedKeystore certs/trusted2.jks jars/sign1.jar
 2
 ^not verified[^\n]*\n$
-^.*$
+^Signer certificate not trusted\n$
 --
 Good signature, not trusted #2
 -trustedKeystore certs/trusted1.jks jars/sign2.jar
 2
 ^not verified[^\n]*\n$
-^.*$
+^Signer certificate not trusted\n$
 --
 Good signature, not trusted, but trust not checked
 -skip-trust-check jars/sign1.jar
@@ -57,22 +57,19 @@ Bad signature key usage
 -trustedKeystore certs/all.jks jars/bad_sign.jar
 2
 ^not verified[^\n]*\n$
-# the problem should be reported to stderr
-^.+$
+^Wrong key usage\n$
 --
 Bad signature key usage, ignored
 -skipUsage -trustedKeystore certs/all.jks jars/bad_sign.jar
 0
 ^verified$
-# the problem should be reported to stderr
-^.+$
+^Wrong key usage\n$
 --
 Signer expired and no timestamp
 -trustedKeystore certs/all.jks jars/expired_sign.jar
 1
 ^not verified[^\n]*\n$
-# the problem should be reported to stderr
-^.+$
+^Signer certificate expired$
 --
 Signer expired, but timestamp ok
 -trustedKeystore certs/all.jks jars/expired_sign_tsa1.jar
@@ -84,39 +81,34 @@ Signer expired and the timestamp expired
 -trustedKeystore certs/all.jks jars/expired_sign_expired_tsa.jar
 1
 ^not verified[^\n]*\n$
-# the problem should be reported to stderr
-^.+$
+^Signer certificate expired\nTime stamping authority certificate expired\n$
 --
 Timestamp expired, but signer ok
 -trustedKeystore certs/all.jks jars/sign1_expired_tsa.jar
 0
 ^verified\n$
-# the problem should be reported to stderr
-^.+$
+^Time stamping authority certificate expired\n$
 --
 Timestamp not trusted, but signer ok
 -trustedKeystore certs/trusted1.jks jars/sign1_tsa2.jar
 0
 ^verified\n$
-# the problem should be reported to stderr
-^.+$
+^Time stamping authority certificate not trusted\n$
 --
 Signer expired and the timestamp not trusted
 -trustedKeystore certs/expired.jks jars/expired_sign_tsa2.jar
 1
 ^not verified[^\n]*\n$
-# the problem should be reported to stderr
-^.+$
+^Signer certificate expired\nTime stamping authority certificate not trusted\n$
 --
 Signer's CA expired and the timestamp not trusted
 -trustedKeystore certs/expired.jks jars/expired_ca_sign_tsa2.jar
 1
 ^not verified[^\n]*\n$
-# the problem should be reported to stderr
-^.+$
+^Trust anchor expired\nSigner certificate not trusted\n$
 --
 Good signature, but jar includes an unsigned file
 -trustedKeystore certs/trusted1.jks jars/unsigned_file.jar
 2
 ^not verified\n$
-^contains unsigned entries\n$
+^Contains unsigned entries\n$
