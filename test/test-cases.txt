@@ -21,7 +21,7 @@ Default keystore
 jars/sign1.jar
 2
 ^not trusted\n$
-^Path does not chain with any of the trust anchors\n$
+^Signer certificate not trusted\n$
 --
 Good signature
 -trustedKeystore certs/trusted1.jks jars/sign1.jar
@@ -81,7 +81,7 @@ Signer expired and the timestamp expired
 -trustedKeystore certs/all.jks jars/expired_sign_expired_tsa.jar
 3
 ^expired\n$
-^Signer certificate expired\nTime stamping authority certificate expired\n$
+^Time stamping authority certificate expired\nSigner certificate expired\n$
 --
 Timestamp expired, but signer ok
 -trustedKeystore certs/all.jks jars/sign1_expired_tsa.jar
@@ -99,13 +99,13 @@ Signer expired and the timestamp not trusted
 -trustedKeystore certs/expired.jks jars/expired_sign_tsa2.jar
 3
 ^expired\n$
-^Signer certificate expired\nTime stamping authority certificate not trusted\n$
+^Time stamping authority certificate not trusted\nSigner certificate expired\n$
 --
 Signer's CA expired and the timestamp not trusted
 -trustedKeystore certs/expired.jks jars/expired_ca_sign_tsa2.jar
 3
 ^expired\n$
-^Trust anchor expired\nSigner certificate not trusted\n$
+^Time stamping authority certificate not trusted\nTrust anchor expired\nSigner certificate expired\n$
 --
 Good signature, but jar includes an unsigned file
 -trustedKeystore certs/trusted1.jks jars/unsigned_file.jar
