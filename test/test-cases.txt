@@ -67,7 +67,7 @@ Bad signature key usage, ignored
 --
 Signer expired and no timestamp
 -trustedKeystore certs/all.jks jars/expired_sign.jar
-1
+3
 ^expired\n$
 ^Signer certificate expired$
 --
