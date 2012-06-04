@@ -11,6 +11,11 @@ if "-v" in sys.argv[1:]:
 else:
     verbose = False
 
+if "-e" in sys.argv[1:]:
+    check_stderr = False
+else:
+    check_stderr = True
+
 def run_test(test_name, test_args, test_status, test_stdout, test_stderr):
     print("{0}: ".format(test_name), end="")
     cmd = ["java", "-jar", "../target/verify_jar.jar"] + test_args
@@ -33,7 +38,7 @@ def run_test(test_name, test_args, test_status, test_stdout, test_stderr):
     if not test_stdout[1].match(stdout):
         errors.append(
             "stdout {0!r} does not match /{1}/".format(stdout, test_stdout[0]))
-    if not test_stderr[1].match(stderr):
+    if not test_stderr[1].match(stderr) and check_stderr:
         errors.append(
             "stderr {0!r} does not match /{1}/".format(stderr, test_stderr[0]))
     if errors:
