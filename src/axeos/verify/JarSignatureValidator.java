@@ -237,8 +237,7 @@ public class JarSignatureValidator {
 		}
 	}
 
-	private void validatePath(CertPath path) throws NoSuchAlgorithmException, KeyStoreException,
-			InvalidAlgorithmParameterException, CertPathValidatorException, CRLException, CertificateException, IOException {
+	private void validatePath(CertPath path) throws Exception {
 
 		if (validator == null) {
 			log.finest("  path validation skiped (it needs trusted keystore)");
@@ -249,10 +248,17 @@ public class JarSignatureValidator {
 		if (result == null)
 			throw new RuntimeException("No result???");
 
-		if (params.getDate() == null) {
-			result.getTrustAnchor().getTrustedCert().checkValidity();
-		} else {
-			result.getTrustAnchor().getTrustedCert().checkValidity(params.getDate());
+		try {
+			if (params.getDate() == null) {
+				result.getTrustAnchor().getTrustedCert().checkValidity();
+			} else {
+				result.getTrustAnchor().getTrustedCert().checkValidity(params.getDate());
+			}
+		} catch (Exception e) {
+			if (e instanceof CertificateExpiredException || e.getCause() instanceof CertificateExpiredException) {
+				showErr("Trust anchor expired");
+			}
+			throw new ExpiredException();
 		}
 
 		if (log.isLoggable(Level.FINEST)) {
@@ -326,7 +332,12 @@ public class JarSignatureValidator {
 							validatePath(cp);
 							params.setDate(timestamp.getTimestamp());
 						} catch (Exception e) {
-							showErr("Timestamp: " + e.getMessage());
+							if (e instanceof CertificateExpiredException || e.getCause() instanceof CertificateExpiredException) {
+								showErr("Time stamping authority certificate expired");
+							} else if ("Path does not chain with any of the trust anchors".equals(e.getMessage())) {
+								showErr("Time stamping authority certificate not trusted");
+							} else
+								showErr("Timestamp: " + e.getMessage());
 							log.log(Level.FINE, "Timestamp certificate is not valid", e);
 						}
 
@@ -361,6 +372,8 @@ public class JarSignatureValidator {
 					try {
 						log.finest("Validating signer certificate path");
 						validatePath(path);
+					} catch (ValidatorException e) {
+						throw e;
 					} catch (Exception e) {
 						// e.printStackTrace();
 						if ("Path does not chain with any of the trust anchors".equals(e.getMessage())) {
@@ -388,6 +401,7 @@ public class JarSignatureValidator {
 				log.fine("File is not signed");
 			throw new NotSignedException();
 		} else if (hasUnsignedEntry) {
+			showErr("Contains unsigned entries");
 			if (log.isLoggable(Level.FINE))
 				log.fine("File contains unsigned entries!");
 			throw new UnsignedEntriesException();
