@@ -109,6 +109,6 @@ Signer's CA expired and the timestamp not trusted
 --
 Good signature, but jar includes an unsigned file
 -trustedKeystore certs/trusted1.jks jars/unsigned_file.jar
-5
-^invalid\n$
+1
+^unsigned entries\n$
 ^Contains unsigned entries\n$
