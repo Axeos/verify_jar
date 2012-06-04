@@ -79,7 +79,7 @@ Signer expired, but timestamp ok
 --
 Signer expired and the timestamp expired
 -trustedKeystore certs/all.jks jars/expired_sign_expired_tsa.jar
-1
+3
 ^expired\n$
 ^Signer certificate expired\nTime stamping authority certificate expired\n$
 --
@@ -97,13 +97,13 @@ Timestamp not trusted, but signer ok
 --
 Signer expired and the timestamp not trusted
 -trustedKeystore certs/expired.jks jars/expired_sign_tsa2.jar
-1
+3
 ^expired\n$
 ^Signer certificate expired\nTime stamping authority certificate not trusted\n$
 --
 Signer's CA expired and the timestamp not trusted
 -trustedKeystore certs/expired.jks jars/expired_ca_sign_tsa2.jar
-1
+3
 ^expired\n$
 ^Trust anchor expired\nSigner certificate not trusted\n$
 --
