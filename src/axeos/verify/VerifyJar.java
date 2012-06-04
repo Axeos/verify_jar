@@ -82,14 +82,15 @@ public class VerifyJar {
 		System.err.println("Usage:");
 		System.err.println("   verify_jar <parameters> <jar_file>");
 		System.err.println("Parameters:");
-		System.err.println("  -trustedKeystore <file>  :  ");
-		System.err.println("  -ocsp  :  ");
-		System.err.println("  -ocspResponder <url> :  ");
-		System.err.println("  -crl <file>  :  ");
-		System.err.println("  -skipUsage  :  ");
-		System.err.println("  -quiet  :  ");
-		System.err.println("  -skip-trust-check  :  ");
-		System.err.println("  -time <time>  :  format: yyyy-MM-dd[ HH:mm[:ss[.S]]]");
+		System.err.println("  -trusted-keystore <file>  :  keystore with trusted CA certificates");
+		System.err.println("  -ocsp  :  use OCSP for certificate verification");
+		System.err.println("  -ocsp-responder <url>  :  OCSP responder to use (default: from the signer's certificate)");
+		System.err.println("  -crl <file>  :  certificate revocation list file");
+		System.err.println("  -skip-key-usage  :  do not check key usage attributes on the signer certificate");
+		System.err.println("  -quiet  :  write nothing to stdout and limit warning messages");
+		System.err.println("  -skip-trust-check  :  skip certificate trust check");
+		System.err.println("  -time <time>  :  check signature validity at the given point in time (yyyy-MM-dd[ HH:mm[:ss[.S]]])");
+		System.err.println("  -debug  :  print debug information");
 	}
 
 	private String file;
@@ -143,21 +144,23 @@ public class VerifyJar {
 				handler.setLevel(Level.ALL);
 				logger.addHandler(handler);
 				logger.setLevel(Level.ALL);
-			} else if ("-trustedKeystore".equalsIgnoreCase(par)) {
+			} else if ("-trusted-keystore".equalsIgnoreCase(par)) {
 				jv.setTrustedKeystore(args[++i]);
 			} else if ("-ocsp".equalsIgnoreCase(par)) {
 				jv.setUseOCSP(true);
-			} else if ("-ocspResponder".equalsIgnoreCase(par)) {
+			} else if ("-ocsp-responder".equalsIgnoreCase(par)) {
 				jv.setUseOCSP(true);
 				jv.setOcspResponderURL(args[++i]);
 			} else if ("-crl".equalsIgnoreCase(par)) {
 				jv.getCrlFileNames().add(args[++i]);
-			} else if ("-skipUsage".equalsIgnoreCase(par)) {
+			} else if ("-skip-key-usage".equalsIgnoreCase(par)) {
 				jv.setSkipCertUsage(true);
-			} else if (file == null) {
+			} else if (file == null && !par.startsWith("-")) {
 				file = par;
 			} else {
-				// throw new RuntimeException("Unknown parameter");
+				System.err.println("Unkown command '" + par + "'");
+				showHelp();
+				System.exit(255);
 			}
 		}
 	}

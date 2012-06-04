@@ -24,25 +24,25 @@ jars/sign1.jar
 ^Signer certificate not trusted\n$
 --
 Good signature
--trustedKeystore certs/trusted1.jks jars/sign1.jar
+-trusted-keystore certs/trusted1.jks jars/sign1.jar
 0
 ^valid\n$
 ^$
 --
 Good signature, quiet
--quiet -trustedKeystore certs/trusted1.jks jars/sign1.jar
+-quiet -trusted-keystore certs/trusted1.jks jars/sign1.jar
 0
 ^$
 ^$
 --
 Good signature, not trusted #1
--trustedKeystore certs/trusted2.jks jars/sign1.jar
+-trusted-keystore certs/trusted2.jks jars/sign1.jar
 2
 ^not trusted\n$
 ^Signer certificate not trusted\n$
 --
 Good signature, not trusted #2
--trustedKeystore certs/trusted1.jks jars/sign2.jar
+-trusted-keystore certs/trusted1.jks jars/sign2.jar
 2
 ^not trusted\n$
 ^Signer certificate not trusted\n$
@@ -54,61 +54,61 @@ Good signature, not trusted, but trust not checked
 ^$
 --
 Bad signature key usage
--trustedKeystore certs/all.jks jars/bad_sign.jar
+-trusted-keystore certs/all.jks jars/bad_sign.jar
 5
 ^invalid\n$
 ^Wrong key usage\n$
 --
 Bad signature key usage, ignored
--skipUsage -trustedKeystore certs/all.jks jars/bad_sign.jar
+-skip-key-usage -trusted-keystore certs/all.jks jars/bad_sign.jar
 0
 ^valid$
 ^Wrong key usage\n$
 --
 Signer expired and no timestamp
--trustedKeystore certs/all.jks jars/expired_sign.jar
+-trusted-keystore certs/all.jks jars/expired_sign.jar
 3
 ^expired\n$
 ^Signer certificate expired$
 --
 Signer expired, but timestamp ok
--trustedKeystore certs/all.jks jars/expired_sign_tsa1.jar
+-trusted-keystore certs/all.jks jars/expired_sign_tsa1.jar
 0
 ^valid\n$
 ^$
 --
 Signer expired and the timestamp expired
--trustedKeystore certs/all.jks jars/expired_sign_expired_tsa.jar
+-trusted-keystore certs/all.jks jars/expired_sign_expired_tsa.jar
 3
 ^expired\n$
 ^Time stamping authority certificate expired\nSigner certificate expired\n$
 --
 Timestamp expired, but signer ok
--trustedKeystore certs/all.jks jars/sign1_expired_tsa.jar
+-trusted-keystore certs/all.jks jars/sign1_expired_tsa.jar
 0
 ^valid\n$
 ^Time stamping authority certificate expired\n$
 --
 Timestamp not trusted, but signer ok
--trustedKeystore certs/trusted1.jks jars/sign1_tsa2.jar
+-trusted-keystore certs/trusted1.jks jars/sign1_tsa2.jar
 0
 ^valid\n$
 ^Time stamping authority certificate not trusted\n$
 --
 Signer expired and the timestamp not trusted
--trustedKeystore certs/expired.jks jars/expired_sign_tsa2.jar
+-trusted-keystore certs/expired.jks jars/expired_sign_tsa2.jar
 3
 ^expired\n$
 ^Time stamping authority certificate not trusted\nSigner certificate expired\n$
 --
 Signer's CA expired and the timestamp not trusted
--trustedKeystore certs/expired.jks jars/expired_ca_sign_tsa2.jar
+-trusted-keystore certs/expired.jks jars/expired_ca_sign_tsa2.jar
 3
 ^expired\n$
 ^Time stamping authority certificate not trusted\nTrust anchor expired\nSigner certificate expired\n$
 --
 Good signature, but jar includes an unsigned file
--trustedKeystore certs/trusted1.jks jars/unsigned_file.jar
+-trusted-keystore certs/trusted1.jks jars/unsigned_file.jar
 1
 ^unsigned entries\n$
 ^Contains unsigned entries\n$
