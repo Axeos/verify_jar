@@ -177,15 +177,15 @@ public class VerifyJar {
 			String outMsg = e.getStdOutMessage();
 			int code = e.getExitCode();
 
-			if (outMsg != null)
+			if (!quiet && outMsg != null)
 				System.out.println(outMsg);
 			if (errMsg != null)
 				System.err.println(errMsg);
 			System.exit(code);
 		} catch (Throwable e) {
+			e.printStackTrace();
 			if (!quiet) {
 				System.out.println("error");
-				e.printStackTrace();
 			}
 			System.exit(6);
 		}
