@@ -30,27 +30,27 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import axeos.verify.exceptions.ExpiredException;
+import axeos.verify.exceptions.InvalidException;
+import axeos.verify.exceptions.NotSignedException;
+import axeos.verify.exceptions.NotTrustedException;
+import axeos.verify.exceptions.UnsignedEntriesException;
+import axeos.verify.exceptions.ValidatorException;
+
 public class JarSignatureValidator {
 
-	public static enum Result {
-		badUsage,
-		expiredCertificate,
-		hasUnsignedEntries,
-		invalidCertificate,
-		invalidSignature,
-		notSigned,
-		verified
-
-	}
-
 	private final List<String> crlFileNames = new ArrayList<String>();
+
+	private final Set<String> displayedWarings = new HashSet<String>();
 
 	private final Logger log = Logger.getLogger(JarSignatureValidator.class.getName());
 
@@ -109,8 +109,7 @@ public class JarSignatureValidator {
 		try {
 			this.params = new PKIXParameters(keystore);
 		} catch (InvalidAlgorithmParameterException e) {
-			throw new ValidatorException(Result.invalidCertificate, -1, null,
-					"Path does not chain with any of the trust anchors");
+			throw new InvalidException();
 		}
 
 		if (verificationDate != null) {
@@ -184,7 +183,7 @@ public class JarSignatureValidator {
 		if (trustedKeystore != null) {
 			File f = new File(trustedKeystore);
 			if (!f.exists()) {
-				System.err.println("Keystore '" + f + "' does not exists!");
+				showErr("Keystore '" + f + "' does not exists!");
 				System.exit(4);
 			}
 			log.fine("Using keystore: " + f);
@@ -231,6 +230,13 @@ public class JarSignatureValidator {
 		this.verificationDate = verificationDate;
 	}
 
+	private void showErr(String t) {
+		if (!displayedWarings.contains(t)) {
+			displayedWarings.add(t);
+			System.err.println(t);
+		}
+	}
+
 	private void validatePath(CertPath path) throws NoSuchAlgorithmException, KeyStoreException,
 			InvalidAlgorithmParameterException, CertPathValidatorException, CRLException, CertificateException, IOException {
 
@@ -257,6 +263,7 @@ public class JarSignatureValidator {
 	public void verifyJar(final JarFile jarFile) throws IOException, KeyStoreException, CertificateException,
 			NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertPathValidatorException, CRLException,
 			ValidatorException {
+		displayedWarings.clear();
 		byte[] buffer = new byte[8192];
 
 		boolean anySigned = false;
@@ -287,7 +294,7 @@ public class JarSignatureValidator {
 			} catch (java.lang.SecurityException e) {
 				if (log.isLoggable(Level.FINEST))
 					log.log(Level.FINEST, "  Invalid signature!!!", e);
-				throw new ValidatorException(Result.invalidSignature);
+				throw new InvalidException();
 			} finally {
 				if (is != null) {
 					is.close();
@@ -319,7 +326,7 @@ public class JarSignatureValidator {
 							validatePath(cp);
 							params.setDate(timestamp.getTimestamp());
 						} catch (Exception e) {
-							System.err.println("Timestamp: " + e.getMessage());
+							showErr("Timestamp: " + e.getMessage());
 							log.log(Level.FINE, "Timestamp certificate is not valid", e);
 						}
 
@@ -339,11 +346,11 @@ public class JarSignatureValidator {
 						}
 						boolean correctUsage = isCertForCodeSigning((X509Certificate) cert);// TODO
 						if (!correctUsage)
-							System.err.println("Bad usage");
+							showErr("Wrong key usage");
 
 						if (!skipCertUsage && !correctUsage) {
 							log.fine("Certificate can't be used to signing code");
-							throw new ValidatorException(Result.badUsage);
+							throw new InvalidException();
 						}
 
 						if (log.isLoggable(Level.FINEST)) {
@@ -355,16 +362,21 @@ public class JarSignatureValidator {
 						log.finest("Validating signer certificate path");
 						validatePath(path);
 					} catch (Exception e) {
-						System.err.println(e.getMessage());
+						// e.printStackTrace();
+						if ("Path does not chain with any of the trust anchors".equals(e.getMessage())) {
+							showErr("Signer certificate not trusted");
+						}
+						// else
+						// showErr(e.getMessage());
 
 						if (e instanceof CertificateExpiredException) {
-							throw new ValidatorException(Result.expiredCertificate, null, e.getMessage());
+							throw new ExpiredException();
 						} else if (e.getCause() instanceof CertificateExpiredException) {
-							throw new ValidatorException(Result.expiredCertificate, null, e.getMessage());
+							throw new ExpiredException();
 						}
 
 						log.log(Level.FINE, "Certificate path can't be verified!", e);
-						throw new ValidatorException(Result.invalidCertificate);
+						throw new NotTrustedException();
 					}
 				}
 			}
@@ -374,11 +386,11 @@ public class JarSignatureValidator {
 		if (!anySigned) {
 			if (log.isLoggable(Level.FINE))
 				log.fine("File is not signed");
-			throw new ValidatorException(Result.notSigned);
+			throw new NotSignedException();
 		} else if (hasUnsignedEntry) {
 			if (log.isLoggable(Level.FINE))
 				log.fine("File contains unsigned entries!");
-			throw new ValidatorException(Result.hasUnsignedEntries);
+			throw new UnsignedEntriesException();
 		}
 
 		if (log.isLoggable(Level.FINE))

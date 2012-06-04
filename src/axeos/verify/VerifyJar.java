@@ -14,6 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import axeos.verify.exceptions.ValidatorException;
+
 public class VerifyJar {
 
 	private static class MyFormatter extends Formatter {
@@ -46,9 +48,7 @@ public class VerifyJar {
 		}
 	}
 
-	public static final String NOT_VERIFIED = "not verified";
-
-	public static final String VERIFIED = "verified";
+	public static final String VERIFIED = "valid";
 
 	private static String getBuildDate() {
 		try {
@@ -166,66 +166,25 @@ public class VerifyJar {
 		try {
 			jv.verifyJar(new JarFile(file));
 			if (!quiet) {
-				System.out.println(VERIFIED);
+				System.out.println("valid");
 			}
 			System.exit(0);
 		} catch (ValidatorException e) {
-			String errMsg = null;
-			String outMsg = null;
-			int code;
-			switch (e.getResult()) {
-			case hasUnsignedEntries:
-				System.out.println(NOT_VERIFIED);
-				errMsg = "contains unsigned entries";
-				code = 2;
-				break;
-			case notSigned:
-				errMsg = "not signed";
-				code = 2;
-				break;
-			case badUsage:
-				errMsg = "bad usage";
-				code = 2;
-				break;
-			case invalidCertificate:
-				outMsg = "certificate not valid";
-				code = 2;
-				break;
-			case expiredCertificate:
-				outMsg = "certificate expired";
-				code = 1;
-				break;
-			default:
-				code = 3;
-				outMsg = null;
-				errMsg = null;
-				break;
-			}
+			String errMsg = e.getStdErrMessage();
+			String outMsg = e.getStdOutMessage();
+			int code = e.getExitCode();
 
-			System.out.print(NOT_VERIFIED);
-			if (e.getStdErrMessage() != null)
-				System.out.println(". " + e.getStdErrMessage());
-			else if (outMsg != null)
-				System.out.println(". " + outMsg);
-			else
-				System.out.println();
-
-			if (e.getStdErrMessage() != null)
-				System.err.println(e.getStdErrMessage());
-			else if (errMsg != null)
+			if (outMsg != null)
+				System.out.println(outMsg);
+			if (errMsg != null)
 				System.err.println(errMsg);
-
-			if (e.getExitCode() != -1)
-				System.exit(e.getExitCode());
-			else
-				System.exit(code);
-
+			System.exit(code);
 		} catch (Throwable e) {
 			if (!quiet) {
+				System.out.println("error");
 				e.printStackTrace();
 			}
-			System.out.println(NOT_VERIFIED);
-			System.exit(4);
+			System.exit(6);
 		}
 	}
 }
