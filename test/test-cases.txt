@@ -17,11 +17,13 @@ No arguments
 ^$
 ^Axeos Jar Verifier.*\nUsage:.*
 --
+# the default keystore should never contain the test CA certificates
+# so, however the check fail, it is ok
 Default keystore
 jars/sign1.jar
-2
-^not trusted\n$
-^Signer certificate not trusted\n$
+!0
+^.*\n$
+^.*$
 --
 Good signature
 -trusted-keystore certs/trusted1.jks jars/sign1.jar

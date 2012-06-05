@@ -16,7 +16,8 @@ if "-e" in sys.argv[1:]:
 else:
     check_stderr = True
 
-def run_test(test_name, test_args, test_status, test_stdout, test_stderr):
+def run_test(test_name, test_args, test_status, invert_status_check,
+                                                    test_stdout, test_stderr):
     print("{0}: ".format(test_name), end="")
     cmd = ["java", "-jar", "../target/verify_jar.jar"] + test_args
     if verbose:
@@ -32,7 +33,11 @@ def run_test(test_name, test_args, test_status, test_stdout, test_stderr):
         print("  rc    :", rc)
         print("... ", end="")
     errors = []
-    if test_status != rc:
+    if invert_status_check:
+        if test_status == rc:
+            errors.append(
+                    "Command returned {0} which is forbidden".format(rc))
+    elif test_status != rc:
         errors.append(
                 "Command returned {0} instead of {1}".format(rc, test_status))
     if not test_stdout[1].match(stdout):
@@ -82,6 +87,11 @@ with open("test-cases.txt") as cases_f:
             print("Premature test case definition {0!r} end".format(test_name),
                     file=sys.stderr)
             continue
+        if test_status.startswith("!"):
+            invert_status_check = True
+            test_status = test_status[1:]
+        else:
+            invert_status_check = False
         try:
             test_status = int(test_status)
         except ValueError:
@@ -113,7 +123,7 @@ with open("test-cases.txt") as cases_f:
             if line in ("--", None):
                 break
         tests += 1
-        if run_test(test_name, test_args, test_status,
+        if run_test(test_name, test_args, test_status, invert_status_check,
                                                     test_stdout, test_stderr):
             passed += 1
 print()
