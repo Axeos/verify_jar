@@ -21,8 +21,10 @@
 				<attribute name="Package" value="axeos.verify" />
 				<attribute name="Implementation-Version" value="${version}" />
 			</manifest>
-
 		</jar>
+		<echo file="${target.dir}/verify_jar">#!/bin/bash
+DIR=`dirname $0`
+exec java -jar ${DIR}/verify_jar.jar "$@"</echo>
 	</target>
 
 	<!-- - - - - - - - - - - - - - - - - - 
