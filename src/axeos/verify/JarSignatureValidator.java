@@ -284,12 +284,9 @@ public class JarSignatureValidator {
 
 		final Manifest manifest = jarFile.getManifest();
 
-		final ArrayList<JarEntry> entries = new ArrayList<JarEntry>();
-
 		Enumeration<JarEntry> entriesEnum = jarFile.entries();
 		while (entriesEnum.hasMoreElements()) {
 			JarEntry entry = entriesEnum.nextElement();
-			entries.add(entry);
 			InputStream is = null;
 
 			if (log.isLoggable(Level.FINEST))
