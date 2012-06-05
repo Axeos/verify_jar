@@ -22,9 +22,9 @@
 				<attribute name="Implementation-Version" value="${version}" />
 			</manifest>
 		</jar>
-		<echo file="${target.dir}/verify_jar">#!/bin/bash
+		<echo file="${target.dir}/verify_jar">#!/bin/sh
 DIR=`dirname $0`
-exec java -jar ${DIR}/verify_jar.jar "$@"</echo>
+exec java -jar "$DIR"/verify_jar.jar "$@"</echo>
 		<chmod file="${target.dir}/verify_jar" perm="755" />
 	</target>
 
