@@ -107,3 +107,6 @@ rm expired_sign.p12
 openssl pkcs12 -export -in expired_ca_sign.crt -inkey expired_ca_sign.key -name expired_ca_sign -out expired_ca_sign.p12 -passout pass:123456
 keytool -importkeystore -destkeystore all.jks -deststorepass 123456 -srckeystore expired_ca_sign.p12 -srcstoretype PKCS12 -srcstorepass 123456
 rm expired_ca_sign.p12
+
+keytool -keystore empty.jks -storepass 123456 -importcert -noprompt -trustcacerts -alias ca1 -file ca1.crt
+keytool -keystore empty.jks -storepass 123456 -delete -alias ca1

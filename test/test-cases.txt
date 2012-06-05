@@ -25,6 +25,12 @@ jars/sign1.jar
 ^.*\n$
 ^.*$
 --
+Good signature, empty keystore
+-trusted-keystore certs/empty.jks jars/sign1.jar
+2
+^not trusted\n$
+^No trust anchors defined\nSigner certificate not trusted\n$
+--
 Good signature
 -trusted-keystore certs/trusted1.jks jars/sign1.jar
 0
