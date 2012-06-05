@@ -109,7 +109,9 @@ public class JarSignatureValidator {
 		try {
 			this.params = new PKIXParameters(keystore);
 		} catch (InvalidAlgorithmParameterException e) {
-			throw new InvalidException();
+			System.err.println("No trust anchors defined");
+			System.err.println("Signer certificate not trusted");
+			throw new NotTrustedException();
 		}
 
 		if (verificationDate != null) {
