@@ -48,7 +48,7 @@ that create a Java keystore file with your CA certificates using the
     verify_jar -trusted-keystore mykeystore.jks file.jar
 
 On success the utility will print `valid` to _stdout_ and exit with status 0.
-When the signature verification fails or other error occurs `verifi_jar` will
+When the signature verification fails or other error occurs `verify_jar` will
 print short result string to _stdout_, error messages to _stderr_ and exit
 with non-zero status.
 
@@ -73,5 +73,5 @@ exception for all but the main class. The license and the exception text
 are provided in the LICENSE file.
 
 As the code is inspired by the __jarsigner__ utility sources from the JDK,
-us distributed by Oracle, under the same license, some minor fragments of the
+as distributed by Oracle, under the same license, some minor fragments of the
 code may be the same, so Oracle copyright may also apply.
