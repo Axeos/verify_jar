@@ -64,3 +64,14 @@ Possible exit status values and result strings:
 
 Please note, that only the first error detected is reported this way. And the
 result of `expired` does not mean the signature is otherwise ok.
+
+Copyright and license
+---------------------
+
+The code is distributed on the GPL version 2 license with the 'CLASSPATH'
+exception for all but the main class. The license and the exception text
+are provided in the LICENSE file.
+
+As the code is inspired by the __jarsigner__ utility sources from the JDK,
+us distributed by Oracle, under the same license, some minor fragments of the
+code may be the same, so Oracle copyright may also apply.
